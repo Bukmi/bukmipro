@@ -45,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: parsed.data.email },
         });
         if (!user?.passwordHash) return null;
+        if (user.suspendedAt) return null;
         const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
         if (!ok) return null;
         return {

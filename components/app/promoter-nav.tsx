@@ -10,27 +10,36 @@ import {
   BarChart3,
   Users2,
   CreditCard,
+  Bell,
 } from "lucide-react";
 import type { UserRole } from "@prisma/client";
 import { cn } from "@/lib/utils";
 
-const baseItems = [
+type NavItem = {
+  href: string;
+  label: string;
+  Icon: typeof LayoutDashboard;
+  badgeable?: boolean;
+};
+
+const baseItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/dashboard/buscar", label: "Buscar artistas", Icon: Search },
   { href: "/dashboard/propuestas", label: "Mis propuestas", Icon: Inbox },
+  { href: "/dashboard/notificaciones", label: "Notificaciones", Icon: Bell, badgeable: true },
   { href: "/dashboard/analiticas", label: "Analíticas", Icon: BarChart3 },
   { href: "/dashboard/empresa", label: "Empresa y venues", Icon: Building2 },
   { href: "/dashboard/facturacion", label: "Facturación", Icon: CreditCard },
 ];
 
-const officeItem = { href: "/dashboard/oficina", label: "Roster oficina", Icon: Users2 };
+const officeItem: NavItem = { href: "/dashboard/oficina", label: "Roster oficina", Icon: Users2 };
 
-export function PromoterNav({ role }: { role: UserRole }) {
+export function PromoterNav({ role, unreadCount = 0 }: { role: UserRole; unreadCount?: number }) {
   const pathname = usePathname();
   const items = role === "OFFICE" ? [...baseItems, officeItem] : baseItems;
   return (
     <nav aria-label="Navegación de la promotora" className="flex flex-col gap-1">
-      {items.map(({ href, label, Icon }) => {
+      {items.map(({ href, label, Icon, badgeable }) => {
         const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
         return (
           <Link
@@ -46,7 +55,15 @@ export function PromoterNav({ role }: { role: UserRole }) {
             )}
           >
             <Icon aria-hidden className="h-4 w-4" />
-            {label}
+            <span className="flex-1">{label}</span>
+            {badgeable && unreadCount > 0 && (
+              <span
+                aria-label={`${unreadCount} sin leer`}
+                className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-graphite"
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </Link>
         );
       })}

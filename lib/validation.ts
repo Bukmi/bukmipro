@@ -23,6 +23,20 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email({ message: "Introduce un email válido" }),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(16),
+  password: z
+    .string()
+    .min(10, { message: "Mínimo 10 caracteres" })
+    .max(100)
+    .regex(/[A-Z]/, { message: "Incluye al menos una mayúscula" })
+    .regex(/[0-9]/, { message: "Incluye al menos un número" }),
+});
+
 export const artistOnboardingSchema = z.object({
   stageName: z.string().min(2).max(80),
   formatType: z.enum(["SOLO", "BAND", "DJ"]),

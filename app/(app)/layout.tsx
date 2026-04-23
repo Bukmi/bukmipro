@@ -22,16 +22,26 @@ export default async function AppLayout({
             </span>
           </Link>
           {session && (
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/" });
-              }}
-            >
-              <Button type="submit" variant="ghost" size="sm">
-                Cerrar sesión
-              </Button>
-            </form>
+            <div className="flex items-center gap-2">
+              {session.user.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="rounded-full border border-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-accent hover:bg-accent hover:text-graphite"
+                >
+                  Admin
+                </Link>
+              )}
+              <form
+                action={async () => {
+                  "use server";
+                  await signOut({ redirectTo: "/" });
+                }}
+              >
+                <Button type="submit" variant="ghost" size="sm">
+                  Cerrar sesión
+                </Button>
+              </form>
+            </div>
           )}
         </div>
       </header>

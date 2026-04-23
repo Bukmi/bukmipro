@@ -98,11 +98,36 @@ model User {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
+  suspendedAt       DateTime?
   artistProfile     ArtistProfile?
   promoterProfile   PromoterProfile?
   verificationTokens VerificationToken[]
   sessions          Session[]
   accounts          Account[]
+  notifications     Notification[]
+}
+
+enum NotificationType {
+  PROPOSAL_CREATED
+  PROPOSAL_STATUS
+  NEW_MESSAGE
+  REVIEW_RECEIVED
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String?
+  linkUrl   String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }
 
 model ArtistProfile {
@@ -279,6 +304,7 @@ model BookingReview {
   authorUserId String
   rating      Int
   body        String?
+  hiddenAt    DateTime?
   createdAt   DateTime          @default(now())
 
   @@unique([bookingId, perspective])
@@ -317,6 +343,8 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+  usedAt     DateTime?
+  purpose    String?
   userId     String?
   user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 

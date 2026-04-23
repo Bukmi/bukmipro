@@ -24,6 +24,14 @@ export async function sendVerificationEmail(to: string, verifyUrl: string) {
   });
 }
 
+export async function sendPasswordResetEmail(to: string, resetUrl: string) {
+  return send({
+    to,
+    subject: "Restablecer tu contraseña de Bukmi",
+    body: `Hola,\n\nHemos recibido una solicitud para restablecer tu contraseña.\n\nAbre este enlace para elegir una nueva:\n${resetUrl}\n\nSi no fuiste tú, ignora este mensaje. El enlace caduca en 1 hora.`,
+  });
+}
+
 type ProposalSummary = Pick<
   BookingRequest,
   | "id"

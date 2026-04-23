@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-const PRIVATE_PREFIXES = ["/dashboard", "/onboarding"];
+const PRIVATE_PREFIXES = ["/dashboard", "/onboarding", "/admin"];
 const AUTH_PAGES = ["/login", "/signup"];
 
 export default auth((req) => {
@@ -29,10 +29,17 @@ export default auth((req) => {
   if (
     user &&
     pathname.startsWith("/dashboard") &&
-    user.onboardingStatus !== "COMPLETED"
+    user.onboardingStatus !== "COMPLETED" &&
+    user.role !== "ADMIN"
   ) {
     const url = req.nextUrl.clone();
     url.pathname = "/onboarding";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && pathname.startsWith("/admin") && user.role !== "ADMIN") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

@@ -30,7 +30,7 @@ export default async function ProposalDetailPage({ params }: { params: Params })
       artistProfile: { select: { id: true, userId: true, stageName: true, slug: true } },
       venue: { select: { name: true, city: true, capacity: true } },
       messages: { orderBy: { createdAt: "asc" } },
-      reviews: true,
+      reviews: { where: { hiddenAt: null } },
     },
   });
   if (!booking) notFound();

@@ -13,6 +13,7 @@ import {
   notifyNewMessage,
 } from "@/lib/email";
 import { canSendProposals, planStatus } from "@/lib/plan";
+import { pushNotification } from "@/lib/notifications";
 
 export type ProposalState = {
   ok?: boolean;
@@ -61,7 +62,7 @@ export async function createProposal(
       id: true,
       published: true,
       stageName: true,
-      user: { select: { email: true } },
+      user: { select: { id: true, email: true } },
     },
   });
   if (!artist || !artist.published) {
@@ -105,6 +106,14 @@ export async function createProposal(
       booking,
     });
   }
+
+  await pushNotification({
+    userId: artist.user.id,
+    type: "PROPOSAL_CREATED",
+    title: `Nueva propuesta de ${promoter.companyName}`,
+    body: `${parsed.data.venueName} · ${parsed.data.eventCity}`,
+    linkUrl: `/dashboard/propuestas/${booking.id}`,
+  });
 
   revalidatePath("/dashboard/propuestas");
   redirect(`/dashboard/propuestas/${booking.id}`);
@@ -150,14 +159,15 @@ export async function sendMessage(
   const full = await prisma.bookingRequest.findUnique({
     where: { id: booking.id },
     include: {
-      promoter: { include: { user: { select: { email: true } } } },
+      promoter: { include: { user: { select: { id: true, email: true } } } },
       artistProfile: {
-        select: { stageName: true, user: { select: { email: true } } },
+        select: { stageName: true, user: { select: { id: true, email: true } } },
       },
     },
   });
   if (full) {
     const toEmail = sender === "ARTIST" ? full.promoter.user.email : full.artistProfile.user.email;
+    const toUserId = sender === "ARTIST" ? full.promoter.user.id : full.artistProfile.user.id;
     const recipientName =
       sender === "ARTIST" ? full.promoter.companyName : full.artistProfile.stageName;
     if (toEmail) {
@@ -169,6 +179,13 @@ export async function sendMessage(
         booking: full,
       });
     }
+    await pushNotification({
+      userId: toUserId,
+      type: "NEW_MESSAGE",
+      title: `Nuevo mensaje de ${sender === "ARTIST" ? full.artistProfile.stageName : full.promoter.companyName}`,
+      body: parsed.data.body.slice(0, 140),
+      linkUrl: `/dashboard/propuestas/${booking.id}`,
+    });
   }
 
   revalidatePath(`/dashboard/propuestas/${booking.id}`);
@@ -225,16 +242,17 @@ export async function transitionProposal(
       where: { id: booking.id },
       include: {
         promoter: {
-          select: { companyName: true, user: { select: { email: true } } },
+          select: { companyName: true, user: { select: { id: true, email: true } } },
         },
         artistProfile: {
-          select: { stageName: true, user: { select: { email: true } } },
+          select: { stageName: true, user: { select: { id: true, email: true } } },
         },
       },
     });
     if (full) {
       const toPromoter = booking.role === "ARTIST";
       const toEmail = toPromoter ? full.promoter.user.email : full.artistProfile.user.email;
+      const toUserId = toPromoter ? full.promoter.user.id : full.artistProfile.user.id;
       const recipientName = toPromoter ? full.promoter.companyName : full.artistProfile.stageName;
       const actorName = toPromoter ? full.artistProfile.stageName : full.promoter.companyName;
       if (toEmail) {
@@ -246,6 +264,13 @@ export async function transitionProposal(
           newStatus: next as "ACCEPTED" | "REJECTED" | "BOOKED" | "CANCELLED" | "NEGOTIATING",
         });
       }
+      await pushNotification({
+        userId: toUserId,
+        type: "PROPOSAL_STATUS",
+        title: `Propuesta ${next.toLowerCase()} por ${actorName}`,
+        body: `${full.venueName} · ${full.eventCity}`,
+        linkUrl: `/dashboard/propuestas/${booking.id}`,
+      });
     }
   }
 
@@ -402,6 +427,16 @@ export async function submitReview(
       rating: parsed.data.rating,
       body: parsed.data.body,
     },
+  });
+
+  const counterpartyUserId =
+    perspective === "ARTIST" ? booking.promoter.userId : booking.artistProfile.userId;
+  await pushNotification({
+    userId: counterpartyUserId,
+    type: "REVIEW_RECEIVED",
+    title: "Has recibido una valoración",
+    body: `${parsed.data.rating}/5${parsed.data.body ? ` · ${parsed.data.body.slice(0, 120)}` : ""}`,
+    linkUrl: `/dashboard/propuestas/${booking.id}`,
   });
 
   revalidatePath(`/dashboard/propuestas/${booking.id}`);

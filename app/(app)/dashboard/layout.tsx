@@ -5,6 +5,7 @@ import { PromoterNav } from "@/components/app/promoter-nav";
 import { CompletenessWidget } from "@/components/app/completeness-widget";
 import { PlanBanner } from "@/components/app/plan-banner";
 import { planStatus } from "@/lib/plan";
+import { countUnread } from "@/lib/notifications";
 
 export default async function DashboardLayout({
   children,
@@ -20,6 +21,7 @@ export default async function DashboardLayout({
     select: { planCode: true, subscriptionStatus: true, trialEndsAt: true },
   });
   const status = user ? planStatus(user) : null;
+  const unreadCount = await countUnread(userId);
 
   if (role === "ARTIST") {
     const artist = await prisma.artistProfile.findUnique({
@@ -32,7 +34,7 @@ export default async function DashboardLayout({
         {status && <PlanBanner status={status} />}
         <div className="grid gap-10 lg:grid-cols-[220px_1fr]">
           <aside aria-label="Barra lateral" className="flex flex-col gap-6">
-            <ArtistNav publicSlug={artist.slug} />
+            <ArtistNav publicSlug={artist.slug} unreadCount={unreadCount} />
             <CompletenessWidget score={artist.completenessScore} />
           </aside>
           <div className="min-h-[60vh]">{children}</div>
@@ -47,7 +49,7 @@ export default async function DashboardLayout({
         {status && <PlanBanner status={status} />}
         <div className="grid gap-10 lg:grid-cols-[220px_1fr]">
           <aside aria-label="Barra lateral" className="flex flex-col gap-6">
-            <PromoterNav role={role} />
+            <PromoterNav role={role} unreadCount={unreadCount} />
           </aside>
           <div className="min-h-[60vh]">{children}</div>
         </div>

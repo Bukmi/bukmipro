@@ -179,6 +179,7 @@ async function main() {
 
   await seedProposals(now);
   await seedOfficeRoster(now, passwordHash);
+  await seedAdmin(now, passwordHash);
 
   console.log(`✓ Seeded ${ARTISTS.length} artistas y ${PROMOTERS.length} promotoras`);
   console.log("  Contraseña común para testing: Bukmi1234!");
@@ -235,6 +236,20 @@ async function seedOfficeRoster(now: Date, passwordHash: string) {
       },
     });
   }
+}
+
+async function seedAdmin(now: Date, passwordHash: string) {
+  await prisma.user.upsert({
+    where: { email: "admin@bukmi.dev" },
+    update: {},
+    create: {
+      email: "admin@bukmi.dev",
+      passwordHash,
+      role: UserRole.ADMIN,
+      emailVerifiedAt: now,
+      onboardingStatus: "COMPLETED",
+    },
+  });
 }
 
 async function seedProposals(now: Date) {

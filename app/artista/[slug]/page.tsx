@@ -30,14 +30,17 @@ export default async function ArtistPublicPage({ params }: { params: Params }) {
     include: {
       media: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 12 },
       proposals: {
-        where: { status: "BOOKED", reviews: { some: { perspective: "PROMOTER" } } },
+        where: {
+          status: "BOOKED",
+          reviews: { some: { perspective: "PROMOTER", hiddenAt: null } },
+        },
         select: {
           id: true,
           eventDate: true,
           eventCity: true,
           venueName: true,
           promoter: { select: { companyName: true } },
-          reviews: { where: { perspective: "PROMOTER" } },
+          reviews: { where: { perspective: "PROMOTER", hiddenAt: null } },
         },
         orderBy: { eventDate: "desc" },
         take: 6,

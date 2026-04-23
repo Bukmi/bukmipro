@@ -12,6 +12,7 @@ import {
   Inbox,
   BarChart3,
   CreditCard,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,15 +23,18 @@ const items = [
   { href: "/dashboard/media", label: "Media", Icon: ImageIcon },
   { href: "/dashboard/riders", label: "Riders", Icon: FileText },
   { href: "/dashboard/propuestas", label: "Propuestas", Icon: Inbox },
+  { href: "/dashboard/notificaciones", label: "Notificaciones", Icon: Bell, badgeable: true as const },
   { href: "/dashboard/analiticas", label: "Analíticas", Icon: BarChart3 },
   { href: "/dashboard/facturacion", label: "Facturación", Icon: CreditCard },
 ];
 
-export function ArtistNav({ publicSlug }: { publicSlug?: string }) {
+export function ArtistNav({ publicSlug, unreadCount = 0 }: { publicSlug?: string; unreadCount?: number }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Navegación del artista" className="flex flex-col gap-1">
-      {items.map(({ href, label, Icon }) => {
+      {items.map((item) => {
+        const { href, label, Icon } = item;
+        const badgeable = "badgeable" in item && item.badgeable;
         const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
         return (
           <Link
@@ -46,7 +50,15 @@ export function ArtistNav({ publicSlug }: { publicSlug?: string }) {
             )}
           >
             <Icon aria-hidden className="h-4 w-4" />
-            {label}
+            <span className="flex-1">{label}</span>
+            {badgeable && unreadCount > 0 && (
+              <span
+                aria-label={`${unreadCount} sin leer`}
+                className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-graphite"
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </Link>
         );
       })}
