@@ -146,6 +146,14 @@ export default async function ProposalDetailPage({ params }: { params: Params })
           ) : (
             <ProposalActions bookingId={booking.id} options={options} />
           )}
+          {booking.status === "BOOKED" && (
+            <Link
+              href={`/dashboard/propuestas/${booking.id}/contrato`}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-accent px-4 py-2 text-sm font-bold text-accent hover:bg-accent hover:text-graphite focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
+            >
+              Ver contrato
+            </Link>
+          )}
           <div className="mt-2 flex flex-col gap-1 text-xs text-paper-mute">
             <p>Creada: {new Intl.DateTimeFormat("es-ES").format(booking.createdAt)}</p>
             <p>

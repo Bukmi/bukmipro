@@ -19,6 +19,10 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
   const parsed = searchFiltersSchema.safeParse(sp);
   const filters = parsed.success ? parsed.data : {};
 
+  const availableOnDate = filters.availableOn
+    ? new Date(`${filters.availableOn}T00:00:00.000Z`)
+    : null;
+
   const artists = await prisma.artistProfile.findMany({
     where: {
       published: true,
@@ -36,6 +40,18 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
           }
         : {}),
       ...(filters.maxCache ? { cacheMin: { lte: filters.maxCache } } : {}),
+      ...(availableOnDate
+        ? {
+            NOT: {
+              availability: {
+                some: {
+                  date: availableOnDate,
+                  status: { in: ["BLOCKED", "BOOKED", "TENTATIVE"] as const },
+                },
+              },
+            },
+          }
+        : {}),
     },
     include: { media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } } },
     orderBy: [{ completenessScore: "desc" }, { updatedAt: "desc" }],
@@ -56,7 +72,7 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
       <form
         method="get"
         action="/dashboard/buscar"
-        className="grid gap-4 rounded-2xl bg-graphite-soft p-5 ring-1 ring-graphite-line sm:grid-cols-2 lg:grid-cols-5"
+        className="grid gap-4 rounded-2xl bg-graphite-soft p-5 ring-1 ring-graphite-line sm:grid-cols-2 lg:grid-cols-6"
         role="search"
         aria-label="Filtros de búsqueda"
       >
@@ -95,7 +111,10 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
         <Field id="maxCache" label="Caché máx. (€)">
           <Input name="maxCache" type="number" min={0} defaultValue={filters.maxCache ?? ""} placeholder="1500" />
         </Field>
-        <div className="sm:col-span-2 lg:col-span-5 flex gap-2">
+        <Field id="availableOn" label="Disponible el">
+          <Input name="availableOn" type="date" defaultValue={filters.availableOn ?? ""} />
+        </Field>
+        <div className="sm:col-span-2 lg:col-span-6 flex gap-2">
           <Button type="submit" size="sm">Aplicar filtros</Button>
           <Link
             href="/dashboard/buscar"

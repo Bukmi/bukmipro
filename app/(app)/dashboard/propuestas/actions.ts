@@ -7,6 +7,11 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { requirePromoter, requireArtist } from "@/lib/session";
 import { proposalSchema, messageSchema } from "@/lib/validation";
+import {
+  notifyProposalCreated,
+  notifyProposalStatusChanged,
+  notifyNewMessage,
+} from "@/lib/email";
 
 export type ProposalState = {
   ok?: boolean;
@@ -43,7 +48,12 @@ export async function createProposal(
 
   const artist = await prisma.artistProfile.findUnique({
     where: { id: parsed.data.artistProfileId },
-    select: { id: true, published: true },
+    select: {
+      id: true,
+      published: true,
+      stageName: true,
+      user: { select: { email: true } },
+    },
   });
   if (!artist || !artist.published) {
     return { error: "Artista no disponible." };
@@ -77,6 +87,15 @@ export async function createProposal(
       },
     },
   });
+
+  if (artist.user.email) {
+    await notifyProposalCreated({
+      artistEmail: artist.user.email,
+      artistName: artist.stageName,
+      promoterName: promoter.companyName,
+      booking,
+    });
+  }
 
   revalidatePath("/dashboard/propuestas");
   redirect(`/dashboard/propuestas/${booking.id}`);
@@ -118,6 +137,30 @@ export async function sendMessage(
         : {}),
     },
   });
+
+  const full = await prisma.bookingRequest.findUnique({
+    where: { id: booking.id },
+    include: {
+      promoter: { include: { user: { select: { email: true } } } },
+      artistProfile: {
+        select: { stageName: true, user: { select: { email: true } } },
+      },
+    },
+  });
+  if (full) {
+    const toEmail = sender === "ARTIST" ? full.promoter.user.email : full.artistProfile.user.email;
+    const recipientName =
+      sender === "ARTIST" ? full.promoter.companyName : full.artistProfile.stageName;
+    if (toEmail) {
+      await notifyNewMessage({
+        to: toEmail,
+        recipientName,
+        fromSender: sender,
+        preview: parsed.data.body,
+        booking: full,
+      });
+    }
+  }
 
   revalidatePath(`/dashboard/propuestas/${booking.id}`);
   revalidatePath(`/dashboard/propuestas`);
@@ -167,6 +210,35 @@ export async function transitionProposal(
       });
     }
   });
+
+  if (next !== "INQUIRY") {
+    const full = await prisma.bookingRequest.findUnique({
+      where: { id: booking.id },
+      include: {
+        promoter: {
+          select: { companyName: true, user: { select: { email: true } } },
+        },
+        artistProfile: {
+          select: { stageName: true, user: { select: { email: true } } },
+        },
+      },
+    });
+    if (full) {
+      const toPromoter = booking.role === "ARTIST";
+      const toEmail = toPromoter ? full.promoter.user.email : full.artistProfile.user.email;
+      const recipientName = toPromoter ? full.promoter.companyName : full.artistProfile.stageName;
+      const actorName = toPromoter ? full.artistProfile.stageName : full.promoter.companyName;
+      if (toEmail) {
+        await notifyProposalStatusChanged({
+          to: toEmail,
+          recipientName,
+          actorName,
+          booking: full,
+          newStatus: next as "ACCEPTED" | "REJECTED" | "BOOKED" | "CANCELLED" | "NEGOTIATING",
+        });
+      }
+    }
+  }
 
   revalidatePath(`/dashboard/propuestas/${bookingId}`);
   revalidatePath("/dashboard/propuestas");

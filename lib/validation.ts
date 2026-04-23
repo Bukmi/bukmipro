@@ -81,6 +81,32 @@ export const riderMetaSchema = z.object({
   label: z.string().min(2).max(120),
 });
 
+export const promoterProfileSchema = z.object({
+  companyName: z.string().min(2).max(120),
+  companyType: z.enum(["VENUE", "FESTIVAL", "AGENCY", "OFFICE"]),
+  cif: z.string().max(30).optional().transform((v) => v?.trim() || null),
+  contactEmail: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => v || null)
+    .refine((v) => !v || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v), {
+      message: "Email inválido",
+    }),
+  phone: z.string().max(40).optional().transform((v) => v?.trim() || null),
+});
+export type PromoterProfileInput = z.infer<typeof promoterProfileSchema>;
+
+export const venueSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2).max(120),
+  city: z.string().min(2).max(80),
+  capacity: z.coerce.number().int().positive().max(200000),
+  venueType: z.string().min(2).max(40).default("sala"),
+  defaultGenres: z.array(z.string()).max(10).default([]),
+});
+export type VenueInput = z.infer<typeof venueSchema>;
+
 export const proposalSchema = z.object({
   artistProfileId: z.string().min(1),
   venueId: z.string().optional().nullable().transform((v) => v || null),
@@ -115,6 +141,10 @@ export const searchFiltersSchema = z.object({
   genre: z.string().max(40).optional(),
   formatType: z.enum(["SOLO", "BAND", "DJ"]).optional(),
   maxCache: z.coerce.number().int().min(0).max(500_000).optional(),
+  availableOn: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 
 export const promoterOnboardingSchema = z.object({
