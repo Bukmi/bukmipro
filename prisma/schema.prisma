@@ -1,0 +1,162 @@
+// Bukmi — Prisma schema (Sprint 1 baseline)
+// Docs: https://www.prisma.io/docs
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ARTIST
+  PROMOTER
+  OFFICE
+  ADMIN
+}
+
+enum FormatType {
+  SOLO
+  BAND
+  DJ
+}
+
+enum CompanyType {
+  VENUE
+  FESTIVAL
+  AGENCY
+  OFFICE
+}
+
+enum PlanCode {
+  FREE
+  ARTIST
+  PRO
+  OFFICE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String?
+  role              UserRole
+  locale            String             @default("es")
+  emailVerifiedAt   DateTime?
+  planCode          PlanCode           @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(TRIALING)
+  trialEndsAt       DateTime?
+  onboardingStatus  OnboardingStatus   @default(NOT_STARTED)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  artistProfile     ArtistProfile?
+  promoterProfile   PromoterProfile?
+  verificationTokens VerificationToken[]
+  sessions          Session[]
+  accounts          Account[]
+}
+
+model ArtistProfile {
+  id                 String     @id @default(cuid())
+  userId             String     @unique
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stageName          String
+  slug               String     @unique
+  bio                String?
+  genres             String[]   @default([])
+  formatType         FormatType @default(SOLO)
+  baseCity           String?
+  radiusKm           Int?       @default(150)
+  cacheMin           Int?
+  cacheMax           Int?
+  currency           String     @default("EUR")
+  spotifyUrl         String?
+  youtubeUrl         String?
+  instagramUrl       String?
+  soundcloudUrl      String?
+  completenessScore  Int        @default(0)
+  aiGenerated        Boolean    @default(false)
+  published          Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+}
+
+model PromoterProfile {
+  id           String      @id @default(cuid())
+  userId       String      @unique
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName  String
+  cif          String?
+  companyType  CompanyType @default(VENUE)
+  contactEmail String?
+  phone        String?
+  verified     Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  venues       Venue[]
+}
+
+model Venue {
+  id             String          @id @default(cuid())
+  promoterId     String
+  promoter       PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  name           String
+  city           String
+  capacity       Int
+  venueType      String          @default("sala")
+  defaultGenres  String[]        @default([])
+  createdAt      DateTime        @default(now())
+}
+
+// NextAuth tables (Prisma adapter minimal set)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([identifier, token])
+}

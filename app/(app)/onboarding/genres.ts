@@ -1,0 +1,16 @@
+export const GENRES = [
+  "Indie",
+  "Pop",
+  "Rock",
+  "Electrónica",
+  "Hip-Hop",
+  "Flamenco",
+  "Jazz",
+  "R&B",
+  "Trap",
+  "Latin",
+  "Folk",
+  "Reggae",
+  "Hardcore",
+  "Experimental",
+] as const;
