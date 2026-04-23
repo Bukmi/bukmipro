@@ -3,6 +3,11 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { Button } from "@/components/ui/button";
 import { CalendarCheck, FileSignature, Sparkles, Users } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { ArtistCard } from "@/components/public/artist-card";
+import { GENRE_SLUGS } from "@/lib/genres";
+
+export const revalidate = 600;
 
 const artistBenefits = [
   "Perfil editorial generado con IA",
@@ -18,7 +23,16 @@ const promoterBenefits = [
   "Contratos, riders y pagos centralizados",
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const featured = await prisma.artistProfile.findMany({
+    where: { published: true },
+    include: {
+      media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } },
+    },
+    orderBy: [{ completenessScore: "desc" }, { updatedAt: "desc" }],
+    take: 6,
+  });
+
   return (
     <>
       <SiteHeader />
@@ -73,6 +87,61 @@ export default function LandingPage() {
             </article>
           ))}
         </section>
+
+        {featured.length > 0 && (
+          <section
+            aria-labelledby="featured"
+            className="container-hero flex flex-col gap-8 border-t border-graphite-line py-16"
+          >
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-accent">
+                  Destacados
+                </p>
+                <h2 id="featured" className="mt-2 text-hero">
+                  Artistas con disponibilidad real
+                </h2>
+              </div>
+              <Link
+                href="/artistas"
+                className="text-sm font-bold text-paper underline underline-offset-4 hover:text-accent"
+              >
+                Ver todo el directorio →
+              </Link>
+            </div>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((a) => (
+                <li key={a.id}>
+                  <ArtistCard
+                    artist={{
+                      slug: a.slug,
+                      stageName: a.stageName,
+                      formatType: a.formatType,
+                      baseCity: a.baseCity,
+                      genres: a.genres,
+                      cacheMin: a.cacheMin,
+                      cacheMax: a.cacheMax,
+                      currency: a.currency,
+                      completenessScore: a.completenessScore,
+                      coverUrl: a.media[0]?.url ?? null,
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+            <nav aria-label="Géneros" className="flex flex-wrap gap-2">
+              {GENRE_SLUGS.slice(0, 8).map(({ name, slug }) => (
+                <Link
+                  key={slug}
+                  href={`/generos/${slug}`}
+                  className="inline-flex items-center rounded-full border border-graphite-line px-3 py-1 text-sm text-paper-dim hover:border-accent hover:text-accent"
+                >
+                  {name}
+                </Link>
+              ))}
+            </nav>
+          </section>
+        )}
 
         <section
           aria-labelledby="segments"

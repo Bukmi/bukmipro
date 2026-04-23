@@ -9,7 +9,10 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const SITE_URL = process.env.APP_URL ?? "https://bukmi.pro";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Bukmi — Booking artístico sin intermediarios",
     template: "%s · Bukmi",
@@ -18,11 +21,18 @@ export const metadata: Metadata = {
     "Bukmi conecta artistas y promotoras. Menos WhatsApp, más conciertos. Contratos, riders y disponibilidad en un solo sitio.",
   applicationName: "Bukmi",
   authors: [{ name: "Bukmi", url: "https://bukmi.pro" }],
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Bukmi",
     description: "Booking artístico sin intermediarios.",
     locale: "es_ES",
     type: "website",
+    siteName: "Bukmi",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bukmi",
+    description: "Booking artístico sin intermediarios.",
   },
 };
 

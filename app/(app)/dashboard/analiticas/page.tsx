@@ -24,6 +24,7 @@ export default async function AnaliticasPage() {
     counterparty: string;
   }> = [];
   let perspective: "ARTIST" | "PROMOTER" = "PROMOTER";
+  let views: { last30: number; last90: number } | null = null;
 
   if (role === "ARTIST") {
     perspective = "ARTIST";
@@ -32,6 +33,18 @@ export default async function AnaliticasPage() {
       select: { id: true },
     });
     if (!artist) redirect("/onboarding");
+    const now = new Date();
+    const cutoff30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const cutoff90 = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const [last30, last90] = await Promise.all([
+      prisma.profileView.count({
+        where: { artistProfileId: artist.id, createdAt: { gte: cutoff30 } },
+      }),
+      prisma.profileView.count({
+        where: { artistProfileId: artist.id, createdAt: { gte: cutoff90 } },
+      }),
+    ]);
+    views = { last30, last90 };
     const rows = await prisma.bookingRequest.findMany({
       where: { artistProfileId: artist.id },
       select: {
@@ -137,6 +150,25 @@ export default async function AnaliticasPage() {
           </div>
         ))}
       </dl>
+
+      {views && (
+        <article className="flex flex-col gap-3 rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
+          <header className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-extrabold">Visitas a tu perfil público</h2>
+            <p className="text-xs text-paper-mute">Deduplicadas por sesión</p>
+          </header>
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1 rounded-xl bg-graphite p-4 ring-1 ring-graphite-line">
+              <dt className="text-xs uppercase tracking-wide text-paper-mute">Últimos 30 días</dt>
+              <dd className="text-2xl font-extrabold text-paper">{views.last30}</dd>
+            </div>
+            <div className="flex flex-col gap-1 rounded-xl bg-graphite p-4 ring-1 ring-graphite-line">
+              <dt className="text-xs uppercase tracking-wide text-paper-mute">Últimos 90 días</dt>
+              <dd className="text-2xl font-extrabold text-paper">{views.last90}</dd>
+            </div>
+          </dl>
+        </article>
+      )}
 
       <article className="flex flex-col gap-4 rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
         <header className="flex items-center justify-between">

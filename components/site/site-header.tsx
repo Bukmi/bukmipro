@@ -17,7 +17,13 @@ export function SiteHeader() {
             bukmi.pro
           </span>
         </Link>
-        <nav aria-label="Principal" className="flex items-center gap-2">
+        <nav aria-label="Principal" className="flex items-center gap-1 sm:gap-2">
+          <Link
+            href="/artistas"
+            className="hidden rounded-xl px-3 py-2 text-sm text-paper-dim hover:text-paper sm:inline-flex"
+          >
+            Artistas
+          </Link>
           <Button asChild variant="ghost" size="sm">
             <Link href="/login">Iniciar sesión</Link>
           </Button>

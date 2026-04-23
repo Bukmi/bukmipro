@@ -159,6 +159,18 @@ model ArtistProfile {
   availability  Availability[]
   proposals     BookingRequest[]
   representedBy ArtistRepresentation[]
+  views         ProfileView[]
+}
+
+model ProfileView {
+  id              String        @id @default(cuid())
+  artistProfileId String
+  artistProfile   ArtistProfile @relation(fields: [artistProfileId], references: [id], onDelete: Cascade)
+  referer         String?
+  source          String?
+  createdAt       DateTime      @default(now())
+
+  @@index([artistProfileId, createdAt])
 }
 
 model Media {

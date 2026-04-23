@@ -6,16 +6,40 @@ import { prisma } from "@/lib/prisma";
 import { formatCacheRange } from "@/lib/artist";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { TrackView } from "@/components/public/track-view";
 
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const artist = await prisma.artistProfile.findUnique({ where: { slug } });
+  const artist = await prisma.artistProfile.findUnique({
+    where: { slug },
+    include: {
+      media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } },
+    },
+  });
   if (!artist || !artist.published) return { title: "Artista" };
+  const description =
+    artist.bio?.slice(0, 200) ??
+    `${artist.stageName} · ${artist.baseCity ?? "España"} · ${artist.genres.slice(0, 3).join(", ")}`;
+  const cover = artist.media[0]?.url;
   return {
     title: artist.stageName,
-    description: artist.bio ?? `${artist.stageName} · ${artist.baseCity ?? ""}`,
+    description,
+    alternates: { canonical: `/artista/${artist.slug}` },
+    openGraph: {
+      title: `${artist.stageName} · Bukmi`,
+      description,
+      url: `/artista/${artist.slug}`,
+      type: "profile",
+      images: cover ? [{ url: cover }] : undefined,
+    },
+    twitter: {
+      card: cover ? "summary_large_image" : "summary",
+      title: artist.stageName,
+      description,
+      images: cover ? [cover] : undefined,
+    },
   };
 }
 
@@ -85,6 +109,7 @@ export default async function ArtistPublicPage({ params }: { params: Params }) {
   return (
     <>
       <SiteHeader />
+      <TrackView slug={artist.slug} />
       <main id="main" className="container-hero py-12">
         <article className="flex flex-col gap-12">
           <header className="flex flex-col gap-4">
