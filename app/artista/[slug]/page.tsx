@@ -1,0 +1,151 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Instagram, Youtube, Music2, Link as LinkIcon, MapPin } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { formatCacheRange } from "@/lib/artist";
+import { SiteHeader } from "@/components/site/site-header";
+import { SiteFooter } from "@/components/site/site-footer";
+
+type Params = Promise<{ slug: string }>;
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { slug } = await params;
+  const artist = await prisma.artistProfile.findUnique({ where: { slug } });
+  if (!artist || !artist.published) return { title: "Artista" };
+  return {
+    title: artist.stageName,
+    description: artist.bio ?? `${artist.stageName} · ${artist.baseCity ?? ""}`,
+  };
+}
+
+function formatLabel(f: string) {
+  return f === "SOLO" ? "Solo / Cantautor" : f === "BAND" ? "Banda" : "DJ";
+}
+
+export default async function ArtistPublicPage({ params }: { params: Params }) {
+  const { slug } = await params;
+  const artist = await prisma.artistProfile.findUnique({
+    where: { slug },
+    include: {
+      media: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 12 },
+    },
+  });
+
+  if (!artist || !artist.published) notFound();
+
+  const photos = artist.media.filter((m) => m.kind === "PHOTO");
+  const tracks = artist.media.filter((m) => m.kind === "TRACK");
+  const videos = artist.media.filter((m) => m.kind === "VIDEO");
+
+  const socials = [
+    { href: artist.spotifyUrl, label: "Spotify", Icon: Music2 },
+    { href: artist.youtubeUrl, label: "YouTube", Icon: Youtube },
+    { href: artist.instagramUrl, label: "Instagram", Icon: Instagram },
+    { href: artist.soundcloudUrl, label: "SoundCloud", Icon: LinkIcon },
+  ].filter((s): s is { href: string; label: string; Icon: typeof Music2 } => !!s.href);
+
+  return (
+    <>
+      <SiteHeader />
+      <main id="main" className="container-hero py-12">
+        <article className="flex flex-col gap-12">
+          <header className="flex flex-col gap-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-accent">
+              {formatLabel(artist.formatType)}
+            </p>
+            <h1 className="text-display">{artist.stageName}</h1>
+            <div className="flex flex-wrap gap-6 text-sm text-paper-dim">
+              {artist.baseCity && (
+                <span className="flex items-center gap-2">
+                  <MapPin aria-hidden className="h-4 w-4" /> {artist.baseCity}
+                </span>
+              )}
+              <span>Caché: {formatCacheRange(artist.cacheMin, artist.cacheMax, artist.currency)}</span>
+              <span>Radio: {artist.radiusKm ?? "—"} km</span>
+            </div>
+            {artist.genres.length > 0 && (
+              <ul aria-label="Géneros" className="flex flex-wrap gap-2">
+                {artist.genres.map((g) => (
+                  <li key={g} className="rounded-full border border-graphite-line px-3 py-1 text-xs font-semibold text-paper-dim">
+                    {g}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </header>
+
+          {artist.bio && (
+            <section aria-labelledby="about">
+              <h2 id="about" className="sr-only">Sobre el artista</h2>
+              <p className="max-w-2xl whitespace-pre-line text-lg text-paper/90">{artist.bio}</p>
+            </section>
+          )}
+
+          {photos.length > 0 && (
+            <section aria-labelledby="photos">
+              <h2 id="photos" className="text-hero mb-6">Fotos</h2>
+              <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {photos.map((p) => (
+                  <li key={p.id} className="overflow-hidden rounded-2xl bg-graphite-soft">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.url} alt={p.caption ?? `${artist.stageName} — foto`} className="h-full w-full object-cover" />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {videos.length > 0 && (
+            <section aria-labelledby="videos">
+              <h2 id="videos" className="text-hero mb-6">Videos</h2>
+              <ul className="grid gap-4 md:grid-cols-2">
+                {videos.map((v) => (
+                  <li key={v.id} className="overflow-hidden rounded-2xl bg-graphite-soft">
+                    <video src={v.url} controls className="w-full" aria-label={v.caption ?? `Video de ${artist.stageName}`} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {tracks.length > 0 && (
+            <section aria-labelledby="tracks">
+              <h2 id="tracks" className="text-hero mb-6">Tracks</h2>
+              <ul className="flex flex-col gap-3">
+                {tracks.map((t) => (
+                  <li key={t.id} className="rounded-2xl bg-graphite-soft p-4 ring-1 ring-graphite-line">
+                    <p className="mb-2 text-sm font-semibold">{t.caption ?? "Track"}</p>
+                    <audio src={t.url} controls className="w-full" />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {socials.length > 0 && (
+            <section aria-labelledby="socials">
+              <h2 id="socials" className="text-hero mb-6">En otras plataformas</h2>
+              <ul className="flex flex-wrap gap-3">
+                {socials.map(({ href, label, Icon }) => (
+                  <li key={label}>
+                    <Link
+                      href={href}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-flex items-center gap-2 rounded-full border border-graphite-line px-4 py-2 text-sm font-semibold text-paper hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
+                    >
+                      <Icon aria-hidden className="h-4 w-4" />
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </article>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}

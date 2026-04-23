@@ -31,6 +31,56 @@ export const artistOnboardingSchema = z.object({
 });
 export type ArtistOnboardingInput = z.infer<typeof artistOnboardingSchema>;
 
+const urlOrEmpty = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v === "" ? undefined : v))
+  .refine((v) => !v || /^https?:\/\//i.test(v), {
+    message: "Debe empezar por http(s)://",
+  });
+
+export const artistProfileSchema = z.object({
+  stageName: z.string().min(2).max(80),
+  formatType: z.enum(["SOLO", "BAND", "DJ"]),
+  baseCity: z.string().min(2).max(80),
+  radiusKm: z.coerce.number().int().min(0).max(5000).default(150),
+  bio: z.string().max(1200).optional().transform((v) => v?.trim() || null),
+  genres: z.array(z.string()).min(1).max(8),
+  cacheMin: z.coerce.number().int().min(0).max(500000).optional().nullable(),
+  cacheMax: z.coerce.number().int().min(0).max(500000).optional().nullable(),
+  currency: z.string().length(3).default("EUR"),
+  spotifyUrl: urlOrEmpty,
+  youtubeUrl: urlOrEmpty,
+  instagramUrl: urlOrEmpty,
+  soundcloudUrl: urlOrEmpty,
+  published: z
+    .union([z.literal("on"), z.literal("true"), z.literal("false"), z.boolean()])
+    .optional()
+    .transform((v) => v === true || v === "on" || v === "true"),
+}).refine(
+  (d) => !(d.cacheMin && d.cacheMax) || d.cacheMin <= d.cacheMax,
+  { message: "Caché mínimo no puede superar el máximo", path: ["cacheMax"] }
+);
+export type ArtistProfileInput = z.infer<typeof artistProfileSchema>;
+
+export const availabilitySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida"),
+  status: z.enum(["FREE", "TENTATIVE", "BLOCKED"]),
+  note: z.string().max(200).optional().transform((v) => v?.trim() || null),
+});
+export type AvailabilityInput = z.infer<typeof availabilitySchema>;
+
+export const mediaMetaSchema = z.object({
+  kind: z.enum(["PHOTO", "VIDEO", "TRACK"]),
+  caption: z.string().max(120).optional().transform((v) => v?.trim() || null),
+});
+
+export const riderMetaSchema = z.object({
+  kind: z.enum(["TECHNICAL", "HOSPITALITY", "STAGE_PLOT"]),
+  label: z.string().min(2).max(120),
+});
+
 export const promoterOnboardingSchema = z.object({
   companyName: z.string().min(2).max(120),
   companyType: z.enum(["VENUE", "FESTIVAL", "AGENCY", "OFFICE"]),

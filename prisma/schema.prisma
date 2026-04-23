@@ -50,6 +50,25 @@ enum OnboardingStatus {
   COMPLETED
 }
 
+enum MediaKind {
+  PHOTO
+  VIDEO
+  TRACK
+}
+
+enum RiderKind {
+  TECHNICAL
+  HOSPITALITY
+  STAGE_PLOT
+}
+
+enum AvailabilityStatus {
+  FREE
+  TENTATIVE
+  BLOCKED
+  BOOKED
+}
+
 model User {
   id                String             @id @default(cuid())
   email             String             @unique
@@ -94,6 +113,54 @@ model ArtistProfile {
   published          Boolean    @default(false)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
+
+  media        Media[]
+  riders       Rider[]
+  availability Availability[]
+}
+
+model Media {
+  id              String        @id @default(cuid())
+  artistProfileId String
+  artistProfile   ArtistProfile @relation(fields: [artistProfileId], references: [id], onDelete: Cascade)
+  kind            MediaKind
+  url             String
+  caption         String?
+  mimeType        String?
+  sizeBytes       Int?
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+
+  @@index([artistProfileId, sortOrder])
+}
+
+model Rider {
+  id              String        @id @default(cuid())
+  artistProfileId String
+  artistProfile   ArtistProfile @relation(fields: [artistProfileId], references: [id], onDelete: Cascade)
+  kind            RiderKind     @default(TECHNICAL)
+  label           String
+  url             String
+  mimeType        String?
+  sizeBytes       Int?
+  version         Int           @default(1)
+  createdAt       DateTime      @default(now())
+
+  @@index([artistProfileId, kind])
+}
+
+model Availability {
+  id              String             @id @default(cuid())
+  artistProfileId String
+  artistProfile   ArtistProfile      @relation(fields: [artistProfileId], references: [id], onDelete: Cascade)
+  date            DateTime           @db.Date
+  status          AvailabilityStatus
+  note            String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([artistProfileId, date])
+  @@index([date, status])
 }
 
 model PromoterProfile {
