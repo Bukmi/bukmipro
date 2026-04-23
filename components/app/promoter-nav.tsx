@@ -9,6 +9,7 @@ import {
   Building2,
   BarChart3,
   Users2,
+  CreditCard,
 } from "lucide-react";
 import type { UserRole } from "@prisma/client";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ const baseItems = [
   { href: "/dashboard/propuestas", label: "Mis propuestas", Icon: Inbox },
   { href: "/dashboard/analiticas", label: "Analíticas", Icon: BarChart3 },
   { href: "/dashboard/empresa", label: "Empresa y venues", Icon: Building2 },
+  { href: "/dashboard/facturacion", label: "Facturación", Icon: CreditCard },
 ];
 
 const officeItem = { href: "/dashboard/oficina", label: "Roster oficina", Icon: Users2 };

@@ -247,6 +247,7 @@ model BookingRequest {
   updatedAt       DateTime        @updatedAt
 
   messages        Message[]
+  reviews         BookingReview[]
 
   @@index([artistProfileId, status])
   @@index([promoterId, status])
@@ -263,6 +264,25 @@ model Message {
   createdAt      DateTime       @default(now())
 
   @@index([bookingId, createdAt])
+}
+
+enum ReviewPerspective {
+  ARTIST
+  PROMOTER
+}
+
+model BookingReview {
+  id          String            @id @default(cuid())
+  bookingId   String
+  booking     BookingRequest    @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  perspective ReviewPerspective
+  authorUserId String
+  rating      Int
+  body        String?
+  createdAt   DateTime          @default(now())
+
+  @@unique([bookingId, perspective])
+  @@index([bookingId])
 }
 
 // NextAuth tables (Prisma adapter minimal set)

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import {
   artistOnboardingSchema,
+  officeOnboardingSchema,
   promoterOnboardingSchema,
 } from "@/lib/validation";
 
@@ -77,6 +78,85 @@ export async function completeArtistOnboarding(
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
+}
+
+export async function completeOfficeOnboarding(
+  _prev: OnboardingState,
+  formData: FormData
+): Promise<OnboardingState> {
+  const user = await requireUser();
+  if (user.role !== "OFFICE") {
+    return { error: "Este onboarding es solo para cuentas de oficina." };
+  }
+
+  const raw = {
+    companyName: String(formData.get("companyName") ?? "").trim(),
+    cif: String(formData.get("cif") ?? "").trim(),
+    contactEmail: String(formData.get("contactEmail") ?? ""),
+    rosterSlugs: formData
+      .getAll("rosterSlugs")
+      .map((v) => String(v).toLowerCase().trim())
+      .filter(Boolean),
+  };
+
+  const parsed = officeOnboardingSchema.safeParse(raw);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const i of parsed.error.issues) fieldErrors[i.path.join(".")] = i.message;
+    return { error: "Revisa los campos.", fieldErrors };
+  }
+
+  const office = await prisma.promoterProfile.upsert({
+    where: { userId: user.id },
+    create: {
+      userId: user.id,
+      companyName: parsed.data.companyName,
+      companyType: "OFFICE",
+      cif: parsed.data.cif || null,
+      contactEmail: parsed.data.contactEmail,
+    },
+    update: {
+      companyName: parsed.data.companyName,
+      companyType: "OFFICE",
+      cif: parsed.data.cif || null,
+      contactEmail: parsed.data.contactEmail,
+    },
+  });
+
+  const unknownSlugs: string[] = [];
+  for (const slug of parsed.data.rosterSlugs) {
+    const artist = await prisma.artistProfile.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    if (!artist) {
+      unknownSlugs.push(slug);
+      continue;
+    }
+    await prisma.artistRepresentation.upsert({
+      where: {
+        promoterId_artistProfileId: {
+          promoterId: office.id,
+          artistProfileId: artist.id,
+        },
+      },
+      update: {},
+      create: { promoterId: office.id, artistProfileId: artist.id },
+    });
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { onboardingStatus: "COMPLETED" },
+  });
+
+  revalidatePath("/dashboard");
+  if (unknownSlugs.length > 0) {
+    return {
+      error: `No encontramos artistas para: ${unknownSlugs.join(", ")}. El resto se ha añadido.`,
+    };
+  }
+  redirect("/dashboard/oficina");
 }
 
 export async function completePromoterOnboarding(

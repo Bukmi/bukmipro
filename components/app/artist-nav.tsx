@@ -11,6 +11,7 @@ import {
   Eye,
   Inbox,
   BarChart3,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ const items = [
   { href: "/dashboard/riders", label: "Riders", Icon: FileText },
   { href: "/dashboard/propuestas", label: "Propuestas", Icon: Inbox },
   { href: "/dashboard/analiticas", label: "Analíticas", Icon: BarChart3 },
+  { href: "/dashboard/facturacion", label: "Facturación", Icon: CreditCard },
 ];
 
 export function ArtistNav({ publicSlug }: { publicSlug?: string }) {

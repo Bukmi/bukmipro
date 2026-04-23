@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Instagram, Youtube, Music2, Link as LinkIcon, MapPin } from "lucide-react";
+import { Instagram, Youtube, Music2, Link as LinkIcon, MapPin, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCacheRange } from "@/lib/artist";
 import { SiteHeader } from "@/components/site/site-header";
@@ -29,10 +29,44 @@ export default async function ArtistPublicPage({ params }: { params: Params }) {
     where: { slug },
     include: {
       media: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 12 },
+      proposals: {
+        where: { status: "BOOKED", reviews: { some: { perspective: "PROMOTER" } } },
+        select: {
+          id: true,
+          eventDate: true,
+          eventCity: true,
+          venueName: true,
+          promoter: { select: { companyName: true } },
+          reviews: { where: { perspective: "PROMOTER" } },
+        },
+        orderBy: { eventDate: "desc" },
+        take: 6,
+      },
     },
   });
 
   if (!artist || !artist.published) notFound();
+
+  const reviews = artist.proposals
+    .map((b) => {
+      const r = b.reviews[0];
+      return r
+        ? {
+            id: r.id,
+            rating: r.rating,
+            body: r.body,
+            promoter: b.promoter.companyName,
+            eventDate: b.eventDate,
+            eventCity: b.eventCity,
+            venueName: b.venueName,
+          }
+        : null;
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+  const avgRating =
+    reviews.length === 0
+      ? null
+      : Math.round((reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) * 10) / 10;
 
   const photos = artist.media.filter((m) => m.kind === "PHOTO");
   const tracks = artist.media.filter((m) => m.kind === "TRACK");
@@ -63,6 +97,13 @@ export default async function ArtistPublicPage({ params }: { params: Params }) {
               )}
               <span>Caché: {formatCacheRange(artist.cacheMin, artist.cacheMax, artist.currency)}</span>
               <span>Radio: {artist.radiusKm ?? "—"} km</span>
+              {avgRating !== null && (
+                <span className="flex items-center gap-1" aria-label={`Media ${avgRating} sobre 5`}>
+                  <Star aria-hidden className="h-4 w-4 fill-accent text-accent" />
+                  <strong className="text-paper">{avgRating}</strong>
+                  <span>({reviews.length})</span>
+                </span>
+              )}
             </div>
             {artist.genres.length > 0 && (
               <ul aria-label="Géneros" className="flex flex-wrap gap-2">
@@ -117,6 +158,26 @@ export default async function ArtistPublicPage({ params }: { params: Params }) {
                   <li key={t.id} className="rounded-2xl bg-graphite-soft p-4 ring-1 ring-graphite-line">
                     <p className="mb-2 text-sm font-semibold">{t.caption ?? "Track"}</p>
                     <audio src={t.url} controls className="w-full" />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {reviews.length > 0 && (
+            <section aria-labelledby="reviews">
+              <h2 id="reviews" className="text-hero mb-6">Valoraciones de promotoras</h2>
+              <ul className="grid gap-4 md:grid-cols-2">
+                {reviews.map((r) => (
+                  <li key={r.id} className="flex flex-col gap-2 rounded-2xl bg-graphite-soft p-5 ring-1 ring-graphite-line">
+                    <p className="text-sm font-bold text-accent" aria-label={`${r.rating} sobre 5`}>
+                      {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                    </p>
+                    {r.body && <p className="text-sm text-paper/90">{r.body}</p>}
+                    <footer className="text-xs text-paper-mute">
+                      {r.promoter} · {r.venueName}, {r.eventCity} ·
+                      {" "}{new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric", timeZone: "UTC" }).format(r.eventDate)}
+                    </footer>
                   </li>
                 ))}
               </ul>

@@ -375,6 +375,18 @@ async function seedProposals(now: Date) {
         },
         update: { status: "BOOKED" },
       });
+
+      await prisma.bookingReview.upsert({
+        where: { bookingId_perspective: { bookingId: booking.id, perspective: "PROMOTER" } },
+        create: {
+          bookingId: booking.id,
+          perspective: "PROMOTER",
+          authorUserId: f.promoter.userId,
+          rating: 5,
+          body: "Show redondo, muy profesional, puntualidad y público entregado.",
+        },
+        update: {},
+      });
     }
   }
 }

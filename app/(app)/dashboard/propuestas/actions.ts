@@ -6,12 +6,13 @@ import type { ProposalStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { requirePromoter, requireArtist } from "@/lib/session";
-import { proposalSchema, messageSchema } from "@/lib/validation";
+import { proposalSchema, messageSchema, reviewSchema } from "@/lib/validation";
 import {
   notifyProposalCreated,
   notifyProposalStatusChanged,
   notifyNewMessage,
 } from "@/lib/email";
+import { canSendProposals, planStatus } from "@/lib/plan";
 
 export type ProposalState = {
   ok?: boolean;
@@ -23,7 +24,15 @@ export async function createProposal(
   _prev: ProposalState,
   formData: FormData
 ): Promise<ProposalState> {
-  const { promoter } = await requirePromoter();
+  const { promoter, session } = await requirePromoter();
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id! },
+    select: { planCode: true, subscriptionStatus: true, trialEndsAt: true },
+  });
+  if (!user || !canSendProposals(planStatus(user))) {
+    return { error: "Tu plan no está activo. Actívalo para enviar propuestas." };
+  }
 
   const parsed = proposalSchema.safeParse({
     artistProfileId: String(formData.get("artistProfileId") ?? ""),
@@ -323,4 +332,79 @@ export async function markBookedArtistSide(bookingId: string): Promise<ProposalS
   // Shortcut kept for future — currently promoter-only transitions to BOOKED.
   await requireArtist();
   return { error: "Solo la promotora puede confirmar el booking." };
+}
+
+export type ReviewState = {
+  ok?: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string>;
+};
+
+export async function submitReview(
+  _prev: ReviewState,
+  formData: FormData
+): Promise<ReviewState> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Sesión requerida." };
+
+  const parsed = reviewSchema.safeParse({
+    bookingId: String(formData.get("bookingId") ?? ""),
+    rating: String(formData.get("rating") ?? ""),
+    body: String(formData.get("body") ?? ""),
+  });
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? "");
+      if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+    }
+    return { error: "Revisa los campos marcados.", fieldErrors };
+  }
+
+  const booking = await prisma.bookingRequest.findUnique({
+    where: { id: parsed.data.bookingId },
+    select: {
+      id: true,
+      status: true,
+      artistProfile: { select: { userId: true, slug: true } },
+      promoter: { select: { userId: true } },
+    },
+  });
+  if (!booking) return { error: "Propuesta no encontrada." };
+  if (booking.status !== "BOOKED") {
+    return { error: "Solo puedes valorar bookings confirmados." };
+  }
+
+  let perspective: "ARTIST" | "PROMOTER";
+  if (session.user.role === "ARTIST" && booking.artistProfile.userId === session.user.id) {
+    perspective = "ARTIST";
+  } else if (
+    (session.user.role === "PROMOTER" || session.user.role === "OFFICE") &&
+    booking.promoter.userId === session.user.id
+  ) {
+    perspective = "PROMOTER";
+  } else {
+    return { error: "No tienes acceso a este booking." };
+  }
+
+  await prisma.bookingReview.upsert({
+    where: {
+      bookingId_perspective: { bookingId: booking.id, perspective },
+    },
+    update: {
+      rating: parsed.data.rating,
+      body: parsed.data.body,
+    },
+    create: {
+      bookingId: booking.id,
+      perspective,
+      authorUserId: session.user.id,
+      rating: parsed.data.rating,
+      body: parsed.data.body,
+    },
+  });
+
+  revalidatePath(`/dashboard/propuestas/${booking.id}`);
+  revalidatePath(`/artista/${booking.artistProfile.slug}`);
+  return { ok: true };
 }

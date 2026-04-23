@@ -130,6 +130,13 @@ export const messageSchema = z.object({
 });
 export type MessageInput = z.infer<typeof messageSchema>;
 
+export const reviewSchema = z.object({
+  bookingId: z.string().min(1),
+  rating: z.coerce.number().int().min(1).max(5),
+  body: z.string().max(800).optional().transform((v) => v?.trim() || null),
+});
+export type ReviewInput = z.infer<typeof reviewSchema>;
+
 export const proposalStatusSchema = z.object({
   bookingId: z.string().min(1),
   action: z.enum(["ACCEPT", "REJECT", "BOOK", "CANCEL", "NEGOTIATE"]),
@@ -157,3 +164,19 @@ export const promoterOnboardingSchema = z.object({
   preferredGenres: z.array(z.string()).min(1).max(8),
 });
 export type PromoterOnboardingInput = z.infer<typeof promoterOnboardingSchema>;
+
+export const officeOnboardingSchema = z.object({
+  companyName: z.string().min(2).max(120),
+  cif: z.string().optional().or(z.literal("")),
+  contactEmail: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => v || null)
+    .refine((v) => !v || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v), { message: "Email inválido" }),
+  rosterSlugs: z
+    .array(z.string().trim().min(1).max(120))
+    .max(10)
+    .default([]),
+});
+export type OfficeOnboardingInput = z.infer<typeof officeOnboardingSchema>;

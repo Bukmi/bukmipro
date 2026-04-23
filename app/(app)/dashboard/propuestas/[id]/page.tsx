@@ -12,6 +12,7 @@ import {
 } from "@/lib/proposal";
 import { MessageThread } from "@/components/app/message-thread";
 import { ProposalActions } from "@/components/app/proposal-actions";
+import { ReviewForm } from "@/components/app/review-form";
 
 type Params = Promise<{ id: string }>;
 
@@ -29,6 +30,7 @@ export default async function ProposalDetailPage({ params }: { params: Params })
       artistProfile: { select: { id: true, userId: true, stageName: true, slug: true } },
       venue: { select: { name: true, city: true, capacity: true } },
       messages: { orderBy: { createdAt: "asc" } },
+      reviews: true,
     },
   });
   if (!booking) notFound();
@@ -135,6 +137,45 @@ export default async function ProposalDetailPage({ params }: { params: Params })
             perspective={perspective}
             canReply={canReply}
           />
+
+          {booking.status === "BOOKED" && (
+            <section aria-labelledby="review" className="flex flex-col gap-4 border-t border-graphite-line pt-6">
+              <header className="flex flex-col gap-1">
+                <h2 id="review" className="text-base font-extrabold">
+                  Valoración {perspective === "ARTIST" ? "del artista" : "de la promotora"}
+                </h2>
+                <p className="text-sm text-paper-dim">
+                  Visible en el perfil público del artista. Puedes editarla más tarde.
+                </p>
+              </header>
+              <ReviewForm
+                bookingId={booking.id}
+                initial={
+                  booking.reviews.find((r) => r.perspective === perspective)
+                    ? {
+                        rating: booking.reviews.find((r) => r.perspective === perspective)!.rating,
+                        body: booking.reviews.find((r) => r.perspective === perspective)!.body,
+                      }
+                    : null
+                }
+              />
+              {booking.reviews.some((r) => r.perspective !== perspective) && (
+                <aside className="rounded-2xl bg-graphite p-4 ring-1 ring-graphite-line">
+                  <p className="text-xs uppercase tracking-wide text-paper-mute">
+                    {perspective === "ARTIST" ? "Lo que dice la promotora" : "Lo que dice el artista"}
+                  </p>
+                  {booking.reviews
+                    .filter((r) => r.perspective !== perspective)
+                    .map((r) => (
+                      <div key={r.id} className="mt-2 flex flex-col gap-1">
+                        <p className="text-sm font-bold">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</p>
+                        {r.body && <p className="text-sm text-paper/90">{r.body}</p>}
+                      </div>
+                    ))}
+                </aside>
+              )}
+            </section>
+          )}
         </article>
 
         <aside aria-label="Acciones" className="flex flex-col gap-4 rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
