@@ -177,8 +177,156 @@ async function main() {
     }
   }
 
+  await seedProposals(now);
+
   console.log(`✓ Seeded ${ARTISTS.length} artistas y ${PROMOTERS.length} promotoras`);
   console.log("  Contraseña común para testing: Bukmi1234!");
+}
+
+async function seedProposals(now: Date) {
+  const inAMonth = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const inTwoMonths = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const inThreeMonths = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+  const apolo = await prisma.promoterProfile.findFirst({
+    where: { user: { email: "apolo@bukmi.dev" } },
+    include: { venues: true, user: true },
+  });
+  const madCool = await prisma.promoterProfile.findFirst({
+    where: { user: { email: "mad-cool@bukmi.dev" } },
+    include: { venues: true, user: true },
+  });
+  const kafe = await prisma.promoterProfile.findFirst({
+    where: { user: { email: "kafe-antzokia@bukmi.dev" } },
+    include: { venues: true, user: true },
+  });
+
+  const rosalia = await prisma.artistProfile.findFirst({
+    where: { user: { email: "rosalia.indie@bukmi.dev" } },
+    include: { user: true },
+  });
+  const nocturnos = await prisma.artistProfile.findFirst({
+    where: { user: { email: "nocturnos.band@bukmi.dev" } },
+    include: { user: true },
+  });
+  const mara = await prisma.artistProfile.findFirst({
+    where: { user: { email: "mara.trap@bukmi.dev" } },
+    include: { user: true },
+  });
+
+  if (!apolo || !madCool || !kafe || !rosalia || !nocturnos || !mara) return;
+
+  const fixtures = [
+    {
+      promoter: apolo,
+      artist: rosalia,
+      eventDate: toDateOnly(inAMonth),
+      status: "INQUIRY" as const,
+      venueName: "Sala Apolo",
+      eventCity: "Barcelona",
+      budgetMin: 2000,
+      budgetMax: 3000,
+      slot: "22:30 - 00:00",
+      notes:
+        "Hola Rosalía, querríamos reservar la sala 2 para una noche indie. Abrimos a las 22 y el público suele ser de 350-400 personas.",
+      messages: [] as { sender: "PROMOTER" | "ARTIST" | "SYSTEM"; body: string }[],
+    },
+    {
+      promoter: madCool,
+      artist: nocturnos,
+      eventDate: toDateOnly(inTwoMonths),
+      status: "NEGOTIATING" as const,
+      venueName: "Mad Cool Festival",
+      eventCity: "Madrid",
+      budgetMin: 4000,
+      budgetMax: 5500,
+      slot: "19:00",
+      notes:
+        "Tenemos un hueco en el escenario Loop. Busco rock alternativo en horario early evening.",
+      messages: [
+        { sender: "ARTIST" as const, body: "Genial, podríamos cerrar si hay backline completo y alojamiento para 4 personas." },
+      ],
+    },
+    {
+      promoter: kafe,
+      artist: mara,
+      eventDate: toDateOnly(inThreeMonths),
+      status: "BOOKED" as const,
+      venueName: "Kafe Antzokia",
+      eventCity: "Bilbao",
+      budgetMin: 1500,
+      budgetMax: 2000,
+      notes:
+        "Fecha cerrada para gira urbana. Apertura con DJ local 21:30, directo 22:30.",
+      messages: [
+        { sender: "ARTIST" as const, body: "Perfecto, confirmamos. Os paso el rider técnico." },
+        { sender: "PROMOTER" as const, body: "Recibido. Bloqueamos fecha y pasamos contrato." },
+      ],
+    },
+  ];
+
+  for (const f of fixtures) {
+    const exists = await prisma.bookingRequest.findFirst({
+      where: {
+        promoterId: f.promoter.id,
+        artistProfileId: f.artist.id,
+        eventDate: f.eventDate,
+      },
+      select: { id: true },
+    });
+    if (exists) continue;
+
+    const booking = await prisma.bookingRequest.create({
+      data: {
+        promoterId: f.promoter.id,
+        artistProfileId: f.artist.id,
+        venueId: f.promoter.venues[0]?.id,
+        eventDate: f.eventDate,
+        eventCity: f.eventCity,
+        venueName: f.venueName,
+        budgetMin: f.budgetMin,
+        budgetMax: f.budgetMax,
+        slot: f.slot,
+        notes: f.notes,
+        status: f.status,
+        lastActivityAt: now,
+        messages: {
+          create: [
+            {
+              sender: "PROMOTER",
+              authorUserId: f.promoter.userId,
+              body: f.notes,
+            },
+            ...f.messages.map((m) => ({
+              sender: m.sender,
+              authorUserId:
+                m.sender === "ARTIST" ? f.artist.userId : m.sender === "PROMOTER" ? f.promoter.userId : null,
+              body: m.body,
+            })),
+          ],
+        },
+      },
+    });
+
+    if (f.status === "BOOKED") {
+      await prisma.availability.upsert({
+        where: {
+          artistProfileId_date: { artistProfileId: f.artist.id, date: f.eventDate },
+        },
+        create: {
+          artistProfileId: f.artist.id,
+          date: f.eventDate,
+          status: "BOOKED",
+          note: `Booking ${booking.id}`,
+        },
+        update: { status: "BOOKED" },
+      });
+    }
+  }
+}
+
+function toDateOnly(d: Date) {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
 main()

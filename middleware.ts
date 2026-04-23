@@ -7,30 +7,29 @@ const AUTH_PAGES = ["/login", "/signup"];
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const session = req.auth;
+  const user = session?.user;
 
   const isPrivate = PRIVATE_PREFIXES.some((p) => pathname.startsWith(p));
   const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
 
-  if (!session && isPrivate) {
+  if (!user && isPrivate) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (session && isAuthPage) {
+  if (user && isAuthPage) {
     const url = req.nextUrl.clone();
     url.pathname =
-      session.user.onboardingStatus === "COMPLETED"
-        ? "/dashboard"
-        : "/onboarding";
+      user.onboardingStatus === "COMPLETED" ? "/dashboard" : "/onboarding";
     return NextResponse.redirect(url);
   }
 
   if (
-    session &&
+    user &&
     pathname.startsWith("/dashboard") &&
-    session.user.onboardingStatus !== "COMPLETED"
+    user.onboardingStatus !== "COMPLETED"
   ) {
     const url = req.nextUrl.clone();
     url.pathname = "/onboarding";

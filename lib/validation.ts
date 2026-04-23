@@ -81,6 +81,42 @@ export const riderMetaSchema = z.object({
   label: z.string().min(2).max(120),
 });
 
+export const proposalSchema = z.object({
+  artistProfileId: z.string().min(1),
+  venueId: z.string().optional().nullable().transform((v) => v || null),
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida"),
+  eventCity: z.string().min(2).max(80),
+  venueName: z.string().min(2).max(120),
+  budgetMin: z.coerce.number().int().min(0).max(1_000_000).optional().nullable(),
+  budgetMax: z.coerce.number().int().min(0).max(1_000_000).optional().nullable(),
+  currency: z.string().length(3).default("EUR"),
+  slot: z.string().max(60).optional().transform((v) => v?.trim() || null),
+  notes: z.string().min(20, "Cuenta un poco más (mín. 20 caracteres)").max(2000),
+}).refine(
+  (d) => !(d.budgetMin && d.budgetMax) || d.budgetMin <= d.budgetMax,
+  { message: "Presupuesto mínimo no puede superar el máximo", path: ["budgetMax"] }
+);
+export type ProposalInput = z.infer<typeof proposalSchema>;
+
+export const messageSchema = z.object({
+  bookingId: z.string().min(1),
+  body: z.string().min(1, "Escribe algo").max(2000),
+});
+export type MessageInput = z.infer<typeof messageSchema>;
+
+export const proposalStatusSchema = z.object({
+  bookingId: z.string().min(1),
+  action: z.enum(["ACCEPT", "REJECT", "BOOK", "CANCEL", "NEGOTIATE"]),
+});
+
+export const searchFiltersSchema = z.object({
+  q: z.string().max(80).optional(),
+  city: z.string().max(80).optional(),
+  genre: z.string().max(40).optional(),
+  formatType: z.enum(["SOLO", "BAND", "DJ"]).optional(),
+  maxCache: z.coerce.number().int().min(0).max(500_000).optional(),
+});
+
 export const promoterOnboardingSchema = z.object({
   companyName: z.string().min(2).max(120),
   companyType: z.enum(["VENUE", "FESTIVAL", "AGENCY", "OFFICE"]),

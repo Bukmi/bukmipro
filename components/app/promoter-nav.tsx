@@ -4,28 +4,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  User,
-  Calendar,
-  Image as ImageIcon,
-  FileText,
-  Eye,
+  Search,
   Inbox,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
-  { href: "/dashboard/perfil", label: "Mi perfil", Icon: User },
-  { href: "/dashboard/calendario", label: "Disponibilidad", Icon: Calendar },
-  { href: "/dashboard/media", label: "Media", Icon: ImageIcon },
-  { href: "/dashboard/riders", label: "Riders", Icon: FileText },
-  { href: "/dashboard/propuestas", label: "Propuestas", Icon: Inbox },
+  { href: "/dashboard/buscar", label: "Buscar artistas", Icon: Search },
+  { href: "/dashboard/propuestas", label: "Mis propuestas", Icon: Inbox },
+  { href: "/dashboard/empresa", label: "Empresa y venues", Icon: Building2 },
 ];
 
-export function ArtistNav({ publicSlug }: { publicSlug?: string }) {
+export function PromoterNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Navegación del artista" className="flex flex-col gap-1">
+    <nav aria-label="Navegación de la promotora" className="flex flex-col gap-1">
       {items.map(({ href, label, Icon }) => {
         const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
         return (
@@ -46,17 +41,6 @@ export function ArtistNav({ publicSlug }: { publicSlug?: string }) {
           </Link>
         );
       })}
-      {publicSlug && (
-        <Link
-          href={`/artista/${publicSlug}`}
-          target="_blank"
-          rel="noopener"
-          className="mt-4 flex items-center gap-3 rounded-xl border border-graphite-line px-3 py-2 text-sm text-paper-dim hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
-        >
-          <Eye aria-hidden className="h-4 w-4" />
-          Ver perfil público
-        </Link>
-      )}
     </nav>
   );
 }
