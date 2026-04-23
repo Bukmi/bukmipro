@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   slug: z.string().min(1).max(120),
@@ -9,6 +10,17 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  const gate = rateLimit(clientKey(req, "track:view"), 30, 60_000);
+  if (!gate.ok) {
+    return NextResponse.json(
+      { ok: false, error: "rate_limited" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil((gate.resetAt - Date.now()) / 1000)) },
+      }
+    );
+  }
+
   let payload: unknown;
   try {
     payload = await req.json();

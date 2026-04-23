@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import type { PlanCode } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { activatePlan, type BillingState } from "@/app/(app)/dashboard/facturacion/actions";
+import { startCheckout, type BillingState } from "@/app/(app)/dashboard/facturacion/actions";
 
 type Plan = {
   code: PlanCode;
@@ -39,7 +39,7 @@ const PLANS: Plan[] = [
 ];
 
 export function PlanPicker({ currentPlan }: { currentPlan: PlanCode }) {
-  const [state, action, pending] = useActionState<BillingState, FormData>(activatePlan, {});
+  const [state, action, pending] = useActionState<BillingState, FormData>(startCheckout, {});
 
   return (
     <div className="flex flex-col gap-4">
@@ -78,7 +78,7 @@ export function PlanPicker({ currentPlan }: { currentPlan: PlanCode }) {
                   aria-busy={pending}
                   className="w-full"
                 >
-                  {current ? "Plan actual" : pending ? "Activando…" : `Activar ${p.name}`}
+                  {current ? "Plan actual" : pending ? "Redirigiendo…" : `Suscribirse a ${p.name}`}
                 </Button>
               </form>
             </li>

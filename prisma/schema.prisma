@@ -99,6 +99,12 @@ model User {
   updatedAt         DateTime           @updatedAt
 
   suspendedAt       DateTime?
+
+  stripeCustomerId      String?   @unique
+  stripeSubscriptionId  String?   @unique
+  stripePriceId         String?
+  currentPeriodEnd      DateTime?
+
   artistProfile     ArtistProfile?
   promoterProfile   PromoterProfile?
   verificationTokens VerificationToken[]
