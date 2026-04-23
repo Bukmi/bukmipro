@@ -34,7 +34,7 @@ export default async function DashboardLayout({
     return (
       <div className="grid gap-10 lg:grid-cols-[220px_1fr]">
         <aside aria-label="Barra lateral" className="flex flex-col gap-6">
-          <PromoterNav />
+          <PromoterNav role={role} />
         </aside>
         <div className="min-h-[60vh]">{children}</div>
       </div>

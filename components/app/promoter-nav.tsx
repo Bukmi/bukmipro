@@ -7,18 +7,25 @@ import {
   Search,
   Inbox,
   Building2,
+  BarChart3,
+  Users2,
 } from "lucide-react";
+import type { UserRole } from "@prisma/client";
 import { cn } from "@/lib/utils";
 
-const items = [
+const baseItems = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/dashboard/buscar", label: "Buscar artistas", Icon: Search },
   { href: "/dashboard/propuestas", label: "Mis propuestas", Icon: Inbox },
+  { href: "/dashboard/analiticas", label: "Analíticas", Icon: BarChart3 },
   { href: "/dashboard/empresa", label: "Empresa y venues", Icon: Building2 },
 ];
 
-export function PromoterNav() {
+const officeItem = { href: "/dashboard/oficina", label: "Roster oficina", Icon: Users2 };
+
+export function PromoterNav({ role }: { role: UserRole }) {
   const pathname = usePathname();
+  const items = role === "OFFICE" ? [...baseItems, officeItem] : baseItems;
   return (
     <nav aria-label="Navegación de la promotora" className="flex flex-col gap-1">
       {items.map(({ href, label, Icon }) => {

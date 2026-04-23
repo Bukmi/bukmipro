@@ -178,9 +178,63 @@ async function main() {
   }
 
   await seedProposals(now);
+  await seedOfficeRoster(now, passwordHash);
 
   console.log(`✓ Seeded ${ARTISTS.length} artistas y ${PROMOTERS.length} promotoras`);
   console.log("  Contraseña común para testing: Bukmi1234!");
+}
+
+async function seedOfficeRoster(now: Date, passwordHash: string) {
+  const officeEmail = "office@bukmi.dev";
+  const user = await prisma.user.upsert({
+    where: { email: officeEmail },
+    update: {},
+    create: {
+      email: officeEmail,
+      passwordHash,
+      role: UserRole.OFFICE,
+      emailVerifiedAt: now,
+      onboardingStatus: "COMPLETED",
+      trialEndsAt: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
+    },
+  });
+  const office = await prisma.promoterProfile.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: {
+      userId: user.id,
+      companyName: "Bukmi Office Demo",
+      companyType: CompanyType.OFFICE,
+      verified: true,
+    },
+  });
+
+  const rosterEmails = [
+    "rosalia.indie@bukmi.dev",
+    "nocturnos.band@bukmi.dev",
+    "mara.trap@bukmi.dev",
+  ];
+  for (const email of rosterEmails) {
+    const artist = await prisma.artistProfile.findFirst({
+      where: { user: { email } },
+      select: { id: true },
+    });
+    if (!artist) continue;
+    await prisma.artistRepresentation.upsert({
+      where: {
+        promoterId_artistProfileId: {
+          promoterId: office.id,
+          artistProfileId: artist.id,
+        },
+      },
+      update: {},
+      create: {
+        promoterId: office.id,
+        artistProfileId: artist.id,
+        note: "Roster demo de oficina",
+      },
+    });
+  }
 }
 
 async function seedProposals(now: Date) {

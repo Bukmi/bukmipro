@@ -129,10 +129,11 @@ model ArtistProfile {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  media        Media[]
-  riders       Rider[]
-  availability Availability[]
-  proposals    BookingRequest[]
+  media         Media[]
+  riders        Rider[]
+  availability  Availability[]
+  proposals     BookingRequest[]
+  representedBy ArtistRepresentation[]
 }
 
 model Media {
@@ -193,6 +194,20 @@ model PromoterProfile {
   updatedAt    DateTime    @updatedAt
   venues       Venue[]
   proposals    BookingRequest[]
+  roster       ArtistRepresentation[]
+}
+
+model ArtistRepresentation {
+  id              String          @id @default(cuid())
+  promoterId      String
+  promoter        PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  artistProfileId String
+  artistProfile   ArtistProfile   @relation(fields: [artistProfileId], references: [id], onDelete: Cascade)
+  note            String?
+  createdAt       DateTime        @default(now())
+
+  @@unique([promoterId, artistProfileId])
+  @@index([promoterId])
 }
 
 model Venue {

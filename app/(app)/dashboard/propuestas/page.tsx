@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Inbox } from "lucide-react";
+import { Download, Inbox } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -68,12 +68,13 @@ export default async function ProposalsInboxPage({
         </p>
       </header>
 
-      <nav aria-label="Filtro de estado" className="flex gap-2">
-        {[
-          { key: "ALL", label: "Todas", href: "/dashboard/propuestas" },
-          { key: "OPEN", label: "Abiertas", href: "/dashboard/propuestas?estado=open" },
-          { key: "FINAL", label: "Cerradas", href: "/dashboard/propuestas?estado=final" },
-        ].map((f) => {
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <nav aria-label="Filtro de estado" className="flex gap-2">
+          {[
+            { key: "ALL", label: "Todas", href: "/dashboard/propuestas" },
+            { key: "OPEN", label: "Abiertas", href: "/dashboard/propuestas?estado=open" },
+            { key: "FINAL", label: "Cerradas", href: "/dashboard/propuestas?estado=final" },
+          ].map((f) => {
           const active = filter === f.key;
           return (
             <Link
@@ -90,7 +91,16 @@ export default async function ProposalsInboxPage({
             </Link>
           );
         })}
-      </nav>
+        </nav>
+        {bookings.length > 0 && (
+          <Link
+            href="/dashboard/propuestas/export.csv"
+            className="inline-flex items-center gap-2 rounded-xl border border-graphite-line px-3 py-1.5 text-sm text-paper-dim hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
+          >
+            <Download aria-hidden className="h-4 w-4" /> Exportar CSV
+          </Link>
+        )}
+      </div>
 
       {bookings.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-graphite-line p-12 text-center">
