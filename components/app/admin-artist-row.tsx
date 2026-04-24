@@ -9,7 +9,7 @@ type ArtistLite = {
   id: string;
   slug: string;
   stageName: string;
-  baseCity: string;
+  baseCity: string | null;
   published: boolean;
   completenessScore: number;
 };
