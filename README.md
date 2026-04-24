@@ -4,14 +4,28 @@ Plataforma que conecta artistas de live entertainment con promotoras, eliminando
 
 Stack: **Next.js 15 (App Router) + TypeScript + Tailwind + shadcn-style UI + Prisma + PostgreSQL + NextAuth v5**.
 
+## Entornos
+
+| Entorno | Rama Git | URL | Base de datos | Stripe |
+|---|---|---|---|---|
+| **Local (dev)** | feature branches | `http://localhost:3000` | Supabase `Bukmi Pro` (compartido con staging) | dev-mode |
+| **Staging** | `staging` | `https://staging.bukmi.pro` | Supabase `Bukmi Pro` | dev-mode |
+| **Producción** | `main` | `https://bukmi.pro` | Supabase `Bukmi Prod` | dev-mode (por ahora) |
+
+Flujo de trabajo:
+
+1. Trabaja en ramas feature (`feat/...`) partiendo de `staging`.
+2. PR a `staging` → deploy automático a `staging.bukmi.pro` para QA.
+3. Cuando staging esté validado, PR de `staging` → `main` → deploy a `bukmi.pro`.
+
+Las variables de entorno se gestionan en el dashboard de Vercel, con scope por entorno (Production / Preview / Development). Ver `.env.example` para la lista completa.
+
 ## Puesta en marcha local
 
-1. **Dependencias** — ya instaladas en `node_modules/` (`npm install` para reinstalar).
-2. **Base de datos** — necesitas un PostgreSQL accesible. Opciones:
-   - **Neon** (recomendado, gratis): crea un proyecto en https://neon.tech y copia la connection string.
-   - Postgres local: `postgresql://user:pw@localhost:5432/bukmi`.
-3. **Variables de entorno** — copia `.env.example` a `.env` y rellena `DATABASE_URL` y `AUTH_SECRET` (`openssl rand -base64 32`).
-4. **Schema y seeds**:
+1. **Dependencias** — `npm install`.
+2. **Base de datos** — usa la connection string del pooler de Supabase (`Bukmi Pro`). Proyect Settings → Database → Connection string → URI (puerto 6543, con `?pgbouncer=true&connection_limit=1`).
+3. **Variables de entorno** — copia `.env.example` a `.env.local` y rellena `DATABASE_URL`, `AUTH_SECRET` (`openssl rand -base64 32`), `AUTH_URL=http://localhost:3000` y `APP_URL=http://localhost:3000`.
+4. **Schema y seeds** (solo la primera vez o tras cambios en `schema.prisma`):
    ```bash
    npm run db:push      # crea las tablas
    npm run db:seed      # 5 artistas + 3 promotoras ficticias
