@@ -9,7 +9,7 @@ type Props = {
   error?: string;
   required?: boolean;
   className?: string;
-  children: React.ReactElement;
+  children: React.ReactElement<Record<string, unknown>>;
 };
 
 export function Field({ id, label, hint, error, required, className, children }: Props) {

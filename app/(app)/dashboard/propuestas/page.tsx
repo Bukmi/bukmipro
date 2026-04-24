@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Download, Inbox } from "lucide-react";
+import type { ProposalStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
@@ -21,9 +22,9 @@ export default async function ProposalsInboxPage({
 
   const statusWhere =
     filter === "OPEN"
-      ? { status: { in: ["INQUIRY", "NEGOTIATING", "ACCEPTED"] as const } }
+      ? { status: { in: ["INQUIRY", "NEGOTIATING", "ACCEPTED"] as ProposalStatus[] } }
       : filter === "FINAL"
-        ? { status: { in: ["BOOKED", "REJECTED", "CANCELLED"] as const } }
+        ? { status: { in: ["BOOKED", "REJECTED", "CANCELLED"] as ProposalStatus[] } }
         : {};
 
   let bookings;

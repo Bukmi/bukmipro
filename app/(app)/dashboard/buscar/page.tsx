@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
+import type { AvailabilityStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requirePromoter } from "@/lib/session";
 import { formatCacheRange } from "@/lib/artist";
@@ -46,7 +47,7 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
               availability: {
                 some: {
                   date: availableOnDate,
-                  status: { in: ["BLOCKED", "BOOKED", "TENTATIVE"] as const },
+                  status: { in: ["BLOCKED", "BOOKED", "TENTATIVE"] as AvailabilityStatus[] },
                 },
               },
             },

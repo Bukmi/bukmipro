@@ -16,7 +16,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module "@auth/core/jwt" {
   interface JWT {
     id: string;
     role: UserRole;
@@ -66,7 +66,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       if (trigger === "update" && token.id) {
         const fresh = await prisma.user.findUnique({
-          where: { id: token.id },
+          where: { id: token.id as string },
           select: { onboardingStatus: true, role: true },
         });
         if (fresh) {
@@ -77,9 +77,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     session: ({ session, token }) => {
-      session.user.id = token.id;
-      session.user.role = token.role;
-      session.user.onboardingStatus = token.onboardingStatus;
+      session.user.id = token.id as string;
+      session.user.role = token.role as UserRole;
+      session.user.onboardingStatus = token.onboardingStatus as OnboardingStatus;
       return session;
     },
   },

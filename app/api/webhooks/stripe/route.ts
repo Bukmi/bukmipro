@@ -15,11 +15,11 @@ function mapSubscriptionStatus(s: Stripe.Subscription.Status) {
     case "unpaid":
     case "incomplete":
     case "incomplete_expired":
-      return "EXPIRED" as const;
+      return "PAST_DUE" as const;
     case "canceled":
       return "CANCELLED" as const;
     case "paused":
-      return "EXPIRED" as const;
+      return "PAST_DUE" as const;
     default:
       return "ACTIVE" as const;
   }
@@ -28,12 +28,12 @@ function mapSubscriptionStatus(s: Stripe.Subscription.Status) {
 async function applySubscription(sub: Stripe.Subscription) {
   const priceId = sub.items.data[0]?.price?.id ?? null;
   const plan = planFromPriceId(priceId) ?? "FREE";
+  const customerMetadataUserId =
+    typeof sub.customer === "string" || sub.customer.deleted
+      ? null
+      : (sub.customer.metadata?.userId ?? null);
   const metadataUserId =
-    (sub.metadata?.userId as string | undefined) ??
-    ((typeof sub.customer === "string" ? null : sub.customer?.metadata?.userId) as
-      | string
-      | undefined) ??
-    null;
+    (sub.metadata?.userId as string | undefined) ?? customerMetadataUserId ?? null;
 
   const user = metadataUserId
     ? await prisma.user.findUnique({ where: { id: metadataUserId }, select: { id: true } })
@@ -67,7 +67,7 @@ async function applySubscription(sub: Stripe.Subscription) {
       body: `Tu plan ${plan} está activo. Gracias por confiar en Bukmi.`,
       linkUrl: "/dashboard/facturacion",
     });
-  } else if (status === "EXPIRED") {
+  } else if (status === "PAST_DUE") {
     await pushNotification({
       userId: user.id,
       type: "SYSTEM",
