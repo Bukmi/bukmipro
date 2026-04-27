@@ -84,6 +84,31 @@ export default async function DashboardPage() {
         </p>
       </header>
 
+      {user.artistProfile && user.artistProfile.completenessScore < 70 && (
+        <aside
+          aria-label="Mejora tu perfil"
+          className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4"
+        >
+          <div className="flex items-center gap-3">
+            <span aria-hidden className="text-xl">✦</span>
+            <div>
+              <p className="text-sm font-semibold text-paper">
+                Tu perfil está al {user.artistProfile.completenessScore}% — complétalo para aparecer en más búsquedas
+              </p>
+              <p className="text-xs text-paper-dim">
+                Añade una foto, tu disponibilidad o un rider para subir posiciones.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/perfil"
+            className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-graphite hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
+          >
+            Completar perfil →
+          </Link>
+        </aside>
+      )}
+
       {user.artistProfile && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

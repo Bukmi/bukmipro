@@ -70,17 +70,84 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
           },
           {
             id: "links",
-            title: "Material (opcional)",
+            title: "Links y caché (opcional)",
             description:
-              "En el Sprint 6 la IA generará tu perfil a partir de estos enlaces. Por ahora quedan guardados para después.",
+              "Añade tus redes y un caché orientativo para aparecer en más búsquedas. Puedes rellenarlo ahora o más tarde.",
             content: (
-              <div className="rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
-                <p className="font-semibold">Skip por ahora</p>
-                <p className="mt-2 text-sm text-paper-dim">
-                  Puedes completar Spotify, YouTube e Instagram desde el editor
-                  de perfil después. Pulsa <strong>Completar onboarding</strong>{" "}
-                  para entrar al dashboard.
-                </p>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  id="spotifyUrl"
+                  label="Spotify"
+                  hint="https://open.spotify.com/artist/…"
+                  error={state?.fieldErrors?.spotifyUrl}
+                >
+                  <Input
+                    name="spotifyUrl"
+                    type="url"
+                    placeholder="https://open.spotify.com/artist/…"
+                    autoComplete="off"
+                  />
+                </Field>
+                <Field
+                  id="youtubeUrl"
+                  label="YouTube"
+                  hint="https://youtube.com/@tucanal"
+                  error={state?.fieldErrors?.youtubeUrl}
+                >
+                  <Input
+                    name="youtubeUrl"
+                    type="url"
+                    placeholder="https://youtube.com/@tucanal"
+                    autoComplete="off"
+                  />
+                </Field>
+                <Field
+                  id="instagramUrl"
+                  label="Instagram"
+                  hint="https://instagram.com/tunombre"
+                  error={state?.fieldErrors?.instagramUrl}
+                >
+                  <Input
+                    name="instagramUrl"
+                    type="url"
+                    placeholder="https://instagram.com/tunombre"
+                    autoComplete="off"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <p className="mb-4 text-sm text-paper-dim">
+                    Caché orientativo — ayuda a las promotoras a filtrar por presupuesto.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field
+                      id="cacheMin"
+                      label="Caché mínimo (€)"
+                      error={state?.fieldErrors?.cacheMin}
+                    >
+                      <Input
+                        name="cacheMin"
+                        type="number"
+                        min={0}
+                        step={50}
+                        placeholder="500"
+                      />
+                    </Field>
+                    <Field
+                      id="cacheMax"
+                      label="Caché máximo (€)"
+                      error={state?.fieldErrors?.cacheMax}
+                    >
+                      <Input
+                        name="cacheMax"
+                        type="number"
+                        min={0}
+                        step={50}
+                        placeholder="2000"
+                      />
+                    </Field>
+                  </div>
+                </div>
+                <input type="hidden" name="currency" value="EUR" />
               </div>
             ),
           },

@@ -37,12 +37,30 @@ export const resetPasswordSchema = z.object({
     .regex(/[0-9]/, { message: "Incluye al menos un número" }),
 });
 
+const urlOrEmptyOnboarding = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v === "" ? undefined : v))
+  .refine((v) => !v || /^https?:\/\//i.test(v), {
+    message: "Debe empezar por http(s)://",
+  });
+
 export const artistOnboardingSchema = z.object({
   stageName: z.string().min(2).max(80),
   formatType: z.enum(["SOLO", "BAND", "DJ"]),
   baseCity: z.string().min(2).max(80),
   genres: z.array(z.string()).min(1, { message: "Elige al menos un género" }).max(5),
-});
+  spotifyUrl: urlOrEmptyOnboarding,
+  youtubeUrl: urlOrEmptyOnboarding,
+  instagramUrl: urlOrEmptyOnboarding,
+  cacheMin: z.coerce.number().int().min(0).max(500000).optional().nullable(),
+  cacheMax: z.coerce.number().int().min(0).max(500000).optional().nullable(),
+  currency: z.string().length(3).default("EUR"),
+}).refine(
+  (d) => !(d.cacheMin && d.cacheMax) || d.cacheMin <= d.cacheMax,
+  { message: "El caché mínimo no puede superar el máximo", path: ["cacheMin"] }
+);
 export type ArtistOnboardingInput = z.infer<typeof artistOnboardingSchema>;
 
 const urlOrEmpty = z

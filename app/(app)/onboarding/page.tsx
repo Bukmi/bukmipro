@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { ArtistWizard } from "./artist-wizard";
 import { PromoterWizard } from "./promoter-wizard";
 import { OfficeWizard } from "./office-wizard";
@@ -12,6 +13,14 @@ export default async function OnboardingPage() {
 
   if (session.user.onboardingStatus === "COMPLETED") {
     redirect("/dashboard");
+  }
+
+  // Mark as IN_PROGRESS on first visit so abandoners resume instead of restarting
+  if (session.user.onboardingStatus === "NOT_STARTED") {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { onboardingStatus: "IN_PROGRESS" },
+    });
   }
 
   return (

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
+import { computeCompleteness } from "@/lib/artist";
 import {
   artistOnboardingSchema,
   officeOnboardingSchema,
@@ -36,6 +37,12 @@ export async function completeArtistOnboarding(
     formatType: String(formData.get("formatType") ?? "SOLO"),
     baseCity: String(formData.get("baseCity") ?? "").trim(),
     genres: formData.getAll("genres").map(String).filter(Boolean),
+    spotifyUrl: String(formData.get("spotifyUrl") ?? ""),
+    youtubeUrl: String(formData.get("youtubeUrl") ?? ""),
+    instagramUrl: String(formData.get("instagramUrl") ?? ""),
+    cacheMin: String(formData.get("cacheMin") ?? "") || null,
+    cacheMax: String(formData.get("cacheMax") ?? "") || null,
+    currency: String(formData.get("currency") ?? "EUR"),
   };
 
   const parsed = artistOnboardingSchema.safeParse(raw);
@@ -52,6 +59,20 @@ export async function completeArtistOnboarding(
     slug = `${baseSlug}-${++n}`;
   }
 
+  const completenessScore = computeCompleteness({
+    bio: null,
+    baseCity: parsed.data.baseCity,
+    genres: parsed.data.genres,
+    cacheMin: parsed.data.cacheMin ?? null,
+    cacheMax: parsed.data.cacheMax ?? null,
+    spotifyUrl: parsed.data.spotifyUrl ?? null,
+    youtubeUrl: parsed.data.youtubeUrl ?? null,
+    instagramUrl: parsed.data.instagramUrl ?? null,
+    soundcloudUrl: null,
+    mediaCount: 0,
+    ridersCount: 0,
+  });
+
   await prisma.artistProfile.upsert({
     where: { userId: user.id },
     create: {
@@ -61,13 +82,26 @@ export async function completeArtistOnboarding(
       formatType: parsed.data.formatType,
       baseCity: parsed.data.baseCity,
       genres: parsed.data.genres,
-      completenessScore: 35,
+      spotifyUrl: parsed.data.spotifyUrl ?? null,
+      youtubeUrl: parsed.data.youtubeUrl ?? null,
+      instagramUrl: parsed.data.instagramUrl ?? null,
+      cacheMin: parsed.data.cacheMin ?? null,
+      cacheMax: parsed.data.cacheMax ?? null,
+      currency: parsed.data.currency,
+      completenessScore,
     },
     update: {
       stageName: parsed.data.stageName,
       formatType: parsed.data.formatType,
       baseCity: parsed.data.baseCity,
       genres: parsed.data.genres,
+      spotifyUrl: parsed.data.spotifyUrl ?? null,
+      youtubeUrl: parsed.data.youtubeUrl ?? null,
+      instagramUrl: parsed.data.instagramUrl ?? null,
+      cacheMin: parsed.data.cacheMin ?? null,
+      cacheMax: parsed.data.cacheMax ?? null,
+      currency: parsed.data.currency,
+      completenessScore,
     },
   });
 
@@ -77,7 +111,7 @@ export async function completeArtistOnboarding(
   });
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  redirect("/onboarding/bienvenida");
 }
 
 export async function completeOfficeOnboarding(
