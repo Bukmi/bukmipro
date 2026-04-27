@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { CookieBanner } from "@/components/site/cookie-banner";
 
 const SITE_URL = process.env.APP_URL ?? "https://bukmi.pro";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
           Saltar al contenido principal
         </a>
         {children}
+        <CookieBanner />
       </body>
     </html>
   );
