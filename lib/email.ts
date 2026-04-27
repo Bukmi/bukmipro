@@ -1,6 +1,7 @@
-// Stub de email. En dev imprime en consola; en producción integra Resend (Sprint 5).
-
+import { Resend } from "resend";
 import type { BookingRequest, MessageSender } from "@prisma/client";
+
+const FROM = "Bukmi <noreply@bukmi.pro>";
 
 type Payload = { to: string; subject: string; body: string };
 
@@ -12,7 +13,20 @@ async function send({ to, subject, body }: Payload) {
     );
     return { ok: true, mocked: true as const };
   }
-  // TODO: implementar con Resend (requiere RESEND_API_KEY).
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to,
+    subject,
+    text: body,
+  });
+
+  if (error) {
+    console.error("[Bukmi · email] Resend error:", error);
+    return { ok: false, mocked: false as const };
+  }
+
   return { ok: true, mocked: false as const };
 }
 
