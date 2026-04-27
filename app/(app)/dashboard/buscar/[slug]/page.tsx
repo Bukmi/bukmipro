@@ -1,33 +1,28 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, MapPin } from "lucide-react";
-import { prisma } from "@/lib/prisma";
 import { requirePromoter } from "@/lib/session";
 import { formatCacheRange } from "@/lib/artist";
+import { getArtistDetailBySlug } from "@/lib/queries";
 import { ProposalForm } from "@/components/app/proposal-form";
 
 type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;
-  const artist = await prisma.artistProfile.findUnique({ where: { slug } });
+  // Uses React cache — no extra DB round-trip when page component calls it too
+  const artist = await getArtistDetailBySlug(slug);
   return { title: artist?.stageName ?? "Artista" };
 }
 
 export default async function ArtistDetailForPromoter({ params }: { params: Params }) {
-  const { promoter } = await requirePromoter();
   const { slug } = await params;
-  const artist = await prisma.artistProfile.findUnique({
-    where: { slug },
-    include: {
-      media: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 8 },
-      availability: {
-        where: { date: { gte: new Date() } },
-        orderBy: { date: "asc" },
-        take: 30,
-      },
-    },
-  });
+  // Run auth + artist query in parallel — neither depends on the other
+  const [{ promoter }, artist] = await Promise.all([
+    requirePromoter(),
+    getArtistDetailBySlug(slug),
+  ]);
   if (!artist || !artist.published) notFound();
 
   const photos = artist.media.filter((m) => m.kind === "PHOTO");
@@ -81,9 +76,14 @@ export default async function ArtistDetailForPromoter({ params }: { params: Para
               <h2 id="photos-heading" className="mb-4 text-base font-extrabold">Fotos</h2>
               <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {photos.slice(0, 6).map((p) => (
-                  <li key={p.id} className="overflow-hidden rounded-2xl bg-graphite-soft">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.url} alt={p.caption ?? `${artist.stageName}`} className="aspect-square w-full object-cover" />
+                  <li key={p.id} className="relative aspect-square overflow-hidden rounded-2xl bg-graphite-soft">
+                    <Image
+                      src={p.url}
+                      alt={p.caption ?? artist.stageName}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                    />
                   </li>
                 ))}
               </ul>

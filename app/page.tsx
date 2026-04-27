@@ -42,11 +42,11 @@ export default async function LandingPage() {
             Live entertainment · España
           </p>
           <h1 className="text-display max-w-4xl">
-            Booking artístico <span className="text-accent">sin intermediarios</span>.
+            Donde tu show encuentra <span className="text-accent">su escenario</span>.
           </h1>
           <p className="mt-8 max-w-2xl text-lg text-paper-dim sm:text-xl">
-            Bukmi conecta artistas y promotoras directamente. Menos llamadas,
-            menos WhatsApp, más conciertos cerrados. Contratos, riders y
+            Bukmi conecta artistas y promotoras sin intermediarios. Menos
+            llamadas, menos mensajes, más shows cerrados. Contratos, riders y
             disponibilidad en una sola plataforma.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">

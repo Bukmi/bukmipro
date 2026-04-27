@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Instagram, Youtube, Music2, Link as LinkIcon, MapPin, Star } from "lucide-react";
-import { prisma } from "@/lib/prisma";
 import { formatCacheRange } from "@/lib/artist";
+import { getPublicArtistBySlug } from "@/lib/queries";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { TrackView } from "@/components/public/track-view";
@@ -12,17 +13,13 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const artist = await prisma.artistProfile.findUnique({
-    where: { slug },
-    include: {
-      media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } },
-    },
-  });
+  // Uses React cache — no extra DB round-trip when page component calls it too
+  const artist = await getPublicArtistBySlug(slug);
   if (!artist || !artist.published) return { title: "Artista" };
   const description =
     artist.bio?.slice(0, 200) ??
     `${artist.stageName} · ${artist.baseCity ?? "España"} · ${artist.genres.slice(0, 3).join(", ")}`;
-  const cover = artist.media[0]?.url;
+  const cover = artist.media.find((m) => m.kind === "PHOTO")?.url;
   return {
     title: artist.stageName,
     description,
@@ -49,29 +46,8 @@ function formatLabel(f: string) {
 
 export default async function ArtistPublicPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const artist = await prisma.artistProfile.findUnique({
-    where: { slug },
-    include: {
-      media: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 12 },
-      proposals: {
-        where: {
-          status: "BOOKED",
-          reviews: { some: { perspective: "PROMOTER", hiddenAt: null } },
-        },
-        select: {
-          id: true,
-          eventDate: true,
-          eventCity: true,
-          venueName: true,
-          promoter: { select: { companyName: true } },
-          reviews: { where: { perspective: "PROMOTER", hiddenAt: null } },
-        },
-        orderBy: { eventDate: "desc" },
-        take: 6,
-      },
-    },
-  });
-
+  // React cache deduplicates — generateMetadata already ran this query
+  const artist = await getPublicArtistBySlug(slug);
   if (!artist || !artist.published) notFound();
 
   const reviews = artist.proposals
@@ -156,9 +132,14 @@ export default async function ArtistPublicPage({ params }: { params: Params }) {
               <h2 id="photos" className="text-hero mb-6">Fotos</h2>
               <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {photos.map((p) => (
-                  <li key={p.id} className="overflow-hidden rounded-2xl bg-graphite-soft">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.url} alt={p.caption ?? `${artist.stageName} — foto`} className="h-full w-full object-cover" />
+                  <li key={p.id} className="relative aspect-square overflow-hidden rounded-2xl bg-graphite-soft">
+                    <Image
+                      src={p.url}
+                      alt={p.caption ?? `${artist.stageName} — foto`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                    />
                   </li>
                 ))}
               </ul>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -106,10 +107,9 @@ export function ApplicationsList({
                 className="flex flex-col gap-4 rounded-2xl bg-graphite-soft p-5 ring-1 ring-graphite-line sm:flex-row sm:items-start"
               >
                 {/* Avatar */}
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-graphite">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-graphite">
                   {cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={cover} alt="" aria-hidden className="h-full w-full object-cover" />
+                    <Image src={cover} alt="" aria-hidden fill className="object-cover" sizes="64px" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-paper-mute text-xs">Sin foto</div>
                   )}
