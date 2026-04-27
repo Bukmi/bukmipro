@@ -8,6 +8,7 @@ import {
   Search,
   Inbox,
   Building2,
+  CalendarPlus,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -44,23 +45,32 @@ export default async function DashboardPage() {
       ])
     : [0, 0, 0, 0];
 
-  const promoterProposals = user.promoterProfile
-    ? await prisma.bookingRequest.findMany({
-        where: { promoterId: user.promoterProfile.id },
-        include: { artistProfile: { select: { stageName: true } } },
-        orderBy: { lastActivityAt: "desc" },
-        take: 5,
-      })
-    : [];
-
-  const promoterOpenCount = user.promoterProfile
-    ? await prisma.bookingRequest.count({
-        where: {
-          promoterId: user.promoterProfile.id,
-          status: { in: ["INQUIRY", "NEGOTIATING", "ACCEPTED"] },
-        },
-      })
-    : 0;
+  const [promoterProposals, promoterOpenCount, promoterCastings, promoterCastingOpenCount] =
+    user.promoterProfile
+      ? await Promise.all([
+          prisma.bookingRequest.findMany({
+            where: { promoterId: user.promoterProfile.id },
+            include: { artistProfile: { select: { stageName: true } } },
+            orderBy: { lastActivityAt: "desc" },
+            take: 5,
+          }),
+          prisma.bookingRequest.count({
+            where: {
+              promoterId: user.promoterProfile.id,
+              status: { in: ["INQUIRY", "NEGOTIATING", "ACCEPTED"] },
+            },
+          }),
+          prisma.castingCall.findMany({
+            where: { promoterId: user.promoterProfile.id },
+            include: { _count: { select: { applications: true } } },
+            orderBy: { createdAt: "desc" },
+            take: 5,
+          }),
+          prisma.castingCall.count({
+            where: { promoterId: user.promoterProfile.id, status: "OPEN" },
+          }),
+        ])
+      : [[], 0, [], 0];
 
   return (
     <section className="flex flex-col gap-8">
@@ -136,7 +146,7 @@ export default async function DashboardPage() {
 
       {user.promoterProfile && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <QuickCard
               href="/dashboard/buscar"
               Icon={Search}
@@ -150,6 +160,13 @@ export default async function DashboardPage() {
               label="Propuestas"
               value={promoterOpenCount.toString()}
               hint="Abiertas"
+            />
+            <QuickCard
+              href="/dashboard/casting"
+              Icon={CalendarPlus}
+              label="Eventos propios"
+              value={promoterCastingOpenCount.toString()}
+              hint="Abiertos"
             />
             <QuickCard
               href="/dashboard/empresa"
@@ -188,6 +205,36 @@ export default async function DashboardPage() {
               </ul>
             )}
           </article>
+
+          {promoterCastings.length > 0 && (
+            <article className="rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-extrabold">Últimos eventos propios</h2>
+                <Link href="/dashboard/casting" className="text-xs text-accent underline-offset-4 hover:underline">Ver todos</Link>
+              </div>
+              <ul className="mt-3 flex flex-col divide-y divide-graphite-line">
+                {promoterCastings.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      href={`/dashboard/casting/${c.id}`}
+                      className="flex items-center justify-between gap-4 py-3 text-sm hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      <span className="font-semibold">{c.title}</span>
+                      <span className="text-xs text-paper-mute">
+                        {new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" }).format(c.eventDate)} · {c._count.applications} candidato{c._count.applications !== 1 ? "s" : ""}
+                      </span>
+                      <span className={cn(
+                        "rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide",
+                        c.status === "OPEN" ? "bg-accent/20 text-accent" : "bg-graphite-line text-paper-dim"
+                      )}>
+                        {c.status === "OPEN" ? "Abierto" : c.status === "CLOSED" ? "Cerrado" : "Cancelado"}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          )}
         </>
       )}
     </section>

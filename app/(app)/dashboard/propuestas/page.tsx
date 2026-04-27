@@ -29,6 +29,8 @@ export default async function ProposalsInboxPage({
 
   let bookings;
   let perspective: "ARTIST" | "PROMOTER";
+  let castings: { id: string; title: string; eventDate: Date; status: import("@prisma/client").CastingStatus; _count: { applications: number } }[] = [];
+
   if (session.user.role === "ARTIST") {
     const artist = await prisma.artistProfile.findUnique({
       where: { userId: session.user.id },
@@ -48,11 +50,21 @@ export default async function ProposalsInboxPage({
     });
     if (!promoter) redirect("/onboarding");
     perspective = "PROMOTER";
-    bookings = await prisma.bookingRequest.findMany({
-      where: { promoterId: promoter.id, ...statusWhere },
-      include: { artistProfile: { select: { stageName: true } } },
-      orderBy: [{ lastActivityAt: "desc" }],
-    });
+    [bookings, castings] = await Promise.all([
+      prisma.bookingRequest.findMany({
+        where: { promoterId: promoter.id, ...statusWhere },
+        include: { artistProfile: { select: { stageName: true } } },
+        orderBy: [{ lastActivityAt: "desc" }],
+      }),
+      prisma.castingCall.findMany({
+        where: {
+          promoterId: promoter.id,
+          ...(filter === "OPEN" ? { status: "OPEN" } : filter === "FINAL" ? { status: { in: ["CLOSED", "CANCELLED"] as import("@prisma/client").CastingStatus[] } } : {}),
+        },
+        include: { _count: { select: { applications: true } } },
+        orderBy: [{ createdAt: "desc" }],
+      }),
+    ]);
   }
 
   return (
@@ -103,7 +115,7 @@ export default async function ProposalsInboxPage({
         )}
       </div>
 
-      {bookings.length === 0 ? (
+      {bookings.length === 0 && castings.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-graphite-line p-12 text-center">
           <Inbox aria-hidden className="h-8 w-8 text-paper-mute" />
           <p className="text-paper-dim">
@@ -122,6 +134,39 @@ export default async function ProposalsInboxPage({
         </div>
       ) : (
         <ul className="flex flex-col gap-3">
+          {/* Eventos propios (castings) — solo promotor */}
+          {castings.map((c) => (
+            <li key={`casting-${c.id}`}>
+              <Link
+                href={`/dashboard/casting/${c.id}`}
+                className="flex flex-col gap-3 rounded-2xl bg-graphite-soft p-5 ring-1 ring-graphite-line transition-colors hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs uppercase tracking-[0.15em] text-paper-mute">
+                    {new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(c.eventDate)}
+                  </p>
+                  <p className="text-base font-extrabold">{c.title}</p>
+                  <p className="text-sm text-paper-dim">
+                    {c._count.applications} candidato{c._count.applications !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="rounded-full bg-graphite-line px-3 py-1 text-xs font-bold uppercase tracking-wide text-paper-dim">
+                    Evento propio
+                  </span>
+                  <span className={cn(
+                    "rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide",
+                    c.status === "OPEN" ? "bg-accent/20 text-accent" : "bg-graphite-line text-paper-dim"
+                  )}>
+                    {c.status === "OPEN" ? "Abierto" : c.status === "CLOSED" ? "Cerrado" : "Cancelado"}
+                  </span>
+                  {c.status === "OPEN" && <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />}
+                </div>
+              </Link>
+            </li>
+          ))}
+
+          {/* Propuestas directas a artistas */}
           {bookings.map((b) => {
             const counterparty =
               perspective === "ARTIST"
