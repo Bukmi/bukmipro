@@ -14,7 +14,11 @@ export function LoginForm() {
   );
 
   return (
-    <form action={formAction} noValidate className="flex flex-col gap-6">
+    <form action={formAction} noValidate className="flex flex-col gap-6" aria-describedby="login-status">
+      {/* Persistent live region — always in DOM so SR picks up updates */}
+      <div id="login-status" className="sr-only" aria-live="polite" aria-atomic="true">
+        {state?.error ?? ""}
+      </div>
       <Field
         id="email"
         label="Email"

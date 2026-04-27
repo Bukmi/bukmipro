@@ -4,7 +4,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-graphite-line py-10">
       <div className="container-hero flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-paper-mute">
+        <p className="text-sm text-paper-dim">
           © {new Date().getFullYear()} Bukmi · Booking artístico sin intermediarios
         </p>
         <nav aria-label="Enlaces legales" className="flex flex-wrap gap-6 text-sm">

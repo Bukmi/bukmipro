@@ -62,7 +62,7 @@ export default async function LandingPage() {
               </Link>
             </Button>
           </div>
-          <p className="mt-6 text-sm text-paper-mute">
+          <p className="mt-6 text-sm text-paper-dim">
             14 días gratis · todas las funcionalidades · sin tarjeta
           </p>
         </section>

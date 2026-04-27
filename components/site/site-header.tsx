@@ -7,12 +7,10 @@ export function SiteHeader() {
       <div className="container-hero flex h-16 items-center justify-between">
         <Link
           href="/"
-          aria-label="Bukmi — ir al inicio"
           className="inline-flex items-center gap-2"
         >
           <span
             className="inline-flex items-center justify-center rounded-full border-2 border-paper px-3 py-1 text-sm font-extrabold tracking-tight"
-            aria-hidden
           >
             bukmi.pro
           </span>

@@ -132,11 +132,11 @@ export default async function ArtistsDirectoryPage({
             </Button>
             <Link
               href="/artistas"
-              className="inline-flex items-center rounded-xl px-3 py-2 text-sm text-paper-dim hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="inline-flex items-center rounded-xl px-3 py-2 text-sm text-paper-dim hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite-soft"
             >
               Limpiar
             </Link>
-            <span className="ml-auto text-xs text-paper-mute">
+            <span className="ml-auto text-xs text-paper-dim">
               ¿Eres promotora?{" "}
               <Link href="/signup?role=PROMOTER" className="text-accent underline">
                 Crea una cuenta
@@ -146,32 +146,35 @@ export default async function ArtistsDirectoryPage({
           </div>
         </form>
 
-        {artists.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-graphite-line p-12 text-center text-paper-mute">
-            No hemos encontrado artistas con esos filtros. Prueba a ampliar los criterios.
-          </p>
-        ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {artists.map((a) => (
-              <li key={a.id}>
-                <ArtistCard
-                  artist={{
-                    slug: a.slug,
-                    stageName: a.stageName,
-                    formatType: a.formatType,
-                    baseCity: a.baseCity,
-                    genres: a.genres,
-                    cacheMin: a.cacheMin,
-                    cacheMax: a.cacheMax,
-                    currency: a.currency,
-                    completenessScore: a.completenessScore,
-                    coverUrl: a.media[0]?.url ?? null,
-                  }}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
+        {/* role="status" announces result count to SR on every render/navigation */}
+        <div role="status" aria-live="polite" aria-atomic="false">
+          {artists.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-graphite-line p-12 text-center text-paper-dim">
+              No hemos encontrado artistas con esos filtros. Prueba a ampliar los criterios.
+            </p>
+          ) : (
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label={`${artists.length} ${artists.length === 1 ? "artista disponible" : "artistas disponibles"}`}>
+              {artists.map((a) => (
+                <li key={a.id}>
+                  <ArtistCard
+                    artist={{
+                      slug: a.slug,
+                      stageName: a.stageName,
+                      formatType: a.formatType,
+                      baseCity: a.baseCity,
+                      genres: a.genres,
+                      cacheMin: a.cacheMin,
+                      cacheMax: a.cacheMax,
+                      currency: a.currency,
+                      completenessScore: a.completenessScore,
+                      coverUrl: a.media[0]?.url ?? null,
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         <aside
           aria-labelledby="genres-index"

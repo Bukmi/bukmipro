@@ -30,12 +30,17 @@ export function Field({ id, label, hint, error, required, className, children }:
       <div className="flex items-baseline justify-between">
         <Label htmlFor={id}>
           {label}
-          {required && <span aria-hidden className="ml-1 text-accent">*</span>}
+          {required && (
+            <>
+              <span aria-hidden className="ml-1 text-accent">*</span>
+              <span className="sr-only"> (obligatorio)</span>
+            </>
+          )}
         </Label>
       </div>
       {child}
       {hint && !error && (
-        <p id={hintId} className="text-xs text-paper-mute">
+        <p id={hintId} className="text-xs text-paper-dim">
           {hint}
         </p>
       )}

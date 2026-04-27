@@ -47,11 +47,17 @@ export function SignupForm({ defaultRole }: { defaultRole: Role }) {
       </div>
 
       <fieldset className="flex flex-col gap-3">
-        <legend className="text-sm font-semibold">¿Cómo vas a usar Bukmi?</legend>
-        <p id="role-hint" className="text-xs text-paper-mute">
+        <legend id="role-legend" className="text-sm font-semibold">¿Cómo vas a usar Bukmi?</legend>
+        <p id="role-hint" className="text-xs text-paper-dim">
           Podrás cambiarlo más adelante desde Ajustes.
         </p>
-        <RoleSelector name="role" value={role} onValueChange={setRole} aria-describedby="role-hint" />
+        <RoleSelector
+          name="role"
+          value={role}
+          onValueChange={setRole}
+          aria-labelledby="role-legend"
+          aria-describedby="role-hint"
+        />
       </fieldset>
 
       <Field
