@@ -2,12 +2,40 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { Button } from "@/components/ui/button";
-import { CalendarCheck, FileSignature, Sparkles, Users } from "lucide-react";
+import { CalendarCheck, ChevronDown, FileSignature, Sparkles, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { ArtistCard } from "@/components/public/artist-card";
 import { GENRE_SLUGS } from "@/lib/genres";
 
 export const revalidate = 600;
+
+const howItWorks = [
+  {
+    label: "Lo que hacemos",
+    tone: "text-accent",
+    text: "Ponemos tu propuesta artística delante de promotoras, agencias y festivales que están programando ahora mismo en tu zona y rango de caché.",
+  },
+  {
+    label: "Lo que no hacemos",
+    tone: "text-paper-mute",
+    text: "No somos tu agencia ni te garantizamos conciertos. La negociación final, el caché y el contrato los cierras tú con cada promotora.",
+  },
+  {
+    label: "Lo que ganas",
+    tone: "text-accent",
+    text: "Dejas de perseguir, ganas tiempo y llegas a quien hasta hoy no te contestaba.",
+  },
+];
+
+// Preguntas frecuentes — respuestas pendientes de redacción
+const faqs: { q: string; a: string }[] = [
+  { q: "¿Bukmi me garantiza conciertos?", a: "" },
+  { q: "¿Cómo funciona el matching con promotoras, agencias y festivales?", a: "" },
+  { q: "¿Puedo usar Bukmi si soy artista emergente o sin historial?", a: "" },
+  { q: "¿Qué pasa cuando una promotora quiere contratarme?", a: "" },
+  { q: "¿Cuánto cuesta y qué incluye el período de prueba?", a: "" },
+  { q: "¿Bukmi es una agencia de booking?", a: "" },
+];
 
 const artistBenefits = [
   "Tu perfil, trabajando mientras tú actúas.",
@@ -88,6 +116,26 @@ export default async function LandingPage() {
               <p className="text-sm text-paper-dim">{text}</p>
             </article>
           ))}
+        </section>
+
+        {/* ── Cómo funciona ───────────────────────────────────────── */}
+        <section
+          aria-labelledby="how-it-works"
+          className="container-hero border-t border-graphite-line py-16"
+        >
+          <h2 id="how-it-works" className="text-hero mb-10">
+            Cómo funciona Bukmi
+          </h2>
+          <dl className="grid gap-8 sm:grid-cols-3">
+            {howItWorks.map(({ label, tone, text }) => (
+              <div key={label} className="flex flex-col gap-3">
+                <dt className={`text-xs font-bold uppercase tracking-[0.2em] ${tone}`}>
+                  {label}
+                </dt>
+                <dd className="text-paper-dim">{text}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         {featured.length > 0 && (
@@ -188,6 +236,37 @@ export default async function LandingPage() {
               <Link href="/signup?role=PROMOTER">Empezar como promotora</Link>
             </Button>
           </article>
+        </section>
+        {/* ── FAQ ─────────────────────────────────────────────────── */}
+        <section
+          aria-labelledby="faq"
+          className="container-hero border-t border-graphite-line py-16"
+        >
+          <h2 id="faq" className="text-hero mb-10">
+            Preguntas frecuentes
+          </h2>
+          <ul className="flex flex-col divide-y divide-graphite-line">
+            {faqs.map(({ q, a }) => (
+              <li key={q}>
+                <details className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-bold text-paper [&::-webkit-details-marker]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:rounded-sm">
+                    {q}
+                    <ChevronDown
+                      aria-hidden
+                      className="h-4 w-4 shrink-0 text-paper-mute transition-transform duration-200 group-open:rotate-180"
+                    />
+                  </summary>
+                  {a ? (
+                    <p className="mt-3 text-paper-dim">{a}</p>
+                  ) : (
+                    <p className="mt-3 text-paper-mute italic text-sm">
+                      Respuesta próximamente.
+                    </p>
+                  )}
+                </details>
+              </li>
+            ))}
+          </ul>
         </section>
       </main>
       <SiteFooter />
