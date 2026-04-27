@@ -112,7 +112,7 @@ export default async function LandingPage() {
             {[
               { value: artistCount,  label: "Artistas" },
               { value: promoterCount, label: "Promotoras" },
-              { value: bookedCount,  label: "Conciertos cerrados" },
+              { value: bookedCount,  label: "Shows cerrados" },
             ].map(({ value, label }) => (
               <div key={label} className="flex flex-col gap-2">
                 <dt className="text-xs uppercase tracking-[0.2em] text-paper-mute order-last">
