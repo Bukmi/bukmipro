@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { Button } from "@/components/ui/button";
@@ -142,42 +141,6 @@ export default async function LandingPage() {
               </div>
             ))}
           </dl>
-        </section>
-
-        {/* ── Franja visual ──────────────────────────────────────── */}
-        <section
-          aria-label="Live entertainment en España"
-          className="container-hero border-t border-graphite-line py-10"
-        >
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-              <Image
-                src="https://images.unsplash.com/photo-1540575467063-178a50c2df87"
-                alt="Multitud disfrutando de un festival de música al aire libre"
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 50vw, 33vw"
-              />
-            </div>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl hidden sm:block">
-              <Image
-                src="https://images.unsplash.com/photo-1501612780327-45045538702b"
-                alt="Artista actuando en directo ante un público entregado"
-                fill
-                className="object-cover"
-                sizes="33vw"
-              />
-            </div>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-              <Image
-                src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f"
-                alt="Concierto con luces de colores y público en sala"
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 50vw, 33vw"
-              />
-            </div>
-          </div>
         </section>
 
         {/* ── Cómo funciona ───────────────────────────────────────── */}
