@@ -70,9 +70,9 @@ export default async function ArtistsDirectoryPage({
             Artistas en directo <span className="text-accent">en España</span>.
           </h1>
           <p className="max-w-2xl text-lg text-paper-dim">
-            {artists.length} {artists.length === 1 ? "artista disponible" : "artistas disponibles"}
-            . Filtra por ciudad, género o formato y abre su perfil para ver
-            disponibilidad real y caché orientativo.
+            {artists.length === 0
+              ? "0 artistas en este filtro. Prueba a ampliar ciudad o género, o abre cualquier perfil para ver disponibilidad real y caché orientativo."
+              : `${artists.length} ${artists.length === 1 ? "artista disponible" : "artistas disponibles"}. Filtra por ciudad, género o formato y abre su perfil para ver disponibilidad real y caché orientativo.`}
           </p>
         </header>
 

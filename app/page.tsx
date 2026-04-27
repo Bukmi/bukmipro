@@ -10,7 +10,7 @@ import { GENRE_SLUGS } from "@/lib/genres";
 export const revalidate = 600;
 
 const artistBenefits = [
-  "Perfil editorial generado con IA",
+  "Tu perfil, trabajando mientras tú actúas.",
   "Caché orientativo basado en tu tracción",
   "Calendario y riders en un solo sitio",
   "Contratos y facturas sin papeleo",
@@ -42,12 +42,14 @@ export default async function LandingPage() {
             Live entertainment · España
           </p>
           <h1 className="text-display max-w-4xl">
-            Booking artístico <span className="text-accent">sin intermediarios</span>.
+            Donde tu música encuentra{" "}
+            <span className="text-accent">a quien la busca</span>.
           </h1>
           <p className="mt-8 max-w-2xl text-lg text-paper-dim sm:text-xl">
-            Bukmi conecta artistas y promotoras directamente. Menos llamadas,
-            menos WhatsApp, más conciertos cerrados. Contratos, riders y
-            disponibilidad en una sola plataforma.
+            Bukmi conecta artistas con promotoras, agencias y festivales que
+            están programando ahora. No cerramos conciertos por ti: hacemos que
+            tu propuesta llegue a quien encaja. Disponibilidad, riders y
+            contratos en una sola plataforma.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button asChild size="lg">
