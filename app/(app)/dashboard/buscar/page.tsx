@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import type { AvailabilityStatus } from "@prisma/client";
@@ -142,8 +143,14 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-graphite">
                     {cover ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={cover} alt="" aria-hidden className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" />
+                      <Image
+                        src={cover}
+                        alt=""
+                        aria-hidden
+                        fill
+                        className="object-cover transition-transform group-hover:scale-[1.02]"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-paper-mute">Sin foto</div>
                     )}

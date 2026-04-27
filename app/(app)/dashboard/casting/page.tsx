@@ -52,21 +52,23 @@ export default async function CastingPage() {
   const isArtist = session.user.role === "ARTIST";
 
   if (isArtist) {
-    const artist = await prisma.artistProfile.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true, castingApplications: { select: { castingCallId: true, status: true } } },
-    });
-    if (!artist) redirect("/onboarding");
-
+    // Run both queries in parallel — castings list doesn't depend on artist.id
     const now = new Date();
-    const castings = await prisma.castingCall.findMany({
-      where: { status: "OPEN", applyDeadline: { gte: now } },
-      include: {
-        promoter: { select: { companyName: true } },
-        _count: { select: { applications: true } },
-      },
-      orderBy: { applyDeadline: "asc" },
-    });
+    const [artist, castings] = await Promise.all([
+      prisma.artistProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true, castingApplications: { select: { castingCallId: true, status: true } } },
+      }),
+      prisma.castingCall.findMany({
+        where: { status: "OPEN", applyDeadline: { gte: now } },
+        include: {
+          promoter: { select: { companyName: true } },
+          _count: { select: { applications: true } },
+        },
+        orderBy: { applyDeadline: "asc" },
+      }),
+    ]);
+    if (!artist) redirect("/onboarding");
 
     const appliedMap = new Map(artist.castingApplications.map((a) => [a.castingCallId, a.status]));
 
@@ -126,18 +128,19 @@ export default async function CastingPage() {
     );
   }
 
-  // PROMOTER view
-  const promoter = await prisma.promoterProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { id: true },
-  });
+  // PROMOTER view — use relation filter so we can run profile check + castings in parallel
+  const [promoter, castings] = await Promise.all([
+    prisma.promoterProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    }),
+    prisma.castingCall.findMany({
+      where: { promoter: { userId: session.user.id } },
+      include: { _count: { select: { applications: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
   if (!promoter) redirect("/onboarding");
-
-  const castings = await prisma.castingCall.findMany({
-    where: { promoterId: promoter.id },
-    include: { _count: { select: { applications: true } } },
-    orderBy: { createdAt: "desc" },
-  });
 
   return (
     <section className="flex flex-col gap-8">
