@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { Button } from "@/components/ui/button";
-import { CalendarCheck, ChevronDown, FileSignature, Sparkles, Users } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { ArtistCard } from "@/components/public/artist-card";
 import { GENRE_SLUGS } from "@/lib/genres";
@@ -52,14 +52,19 @@ const promoterBenefits = [
 ];
 
 export default async function LandingPage() {
-  const featured = await prisma.artistProfile.findMany({
+  const [artistCount, promoterCount, bookedCount, featured] = await Promise.all([
+    prisma.artistProfile.count(),
+    prisma.promoterProfile.count(),
+    prisma.bookingRequest.count({ where: { status: "BOOKED" } }),
+    prisma.artistProfile.findMany({
     where: { published: true },
     include: {
       media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } },
     },
-    orderBy: [{ completenessScore: "desc" }, { updatedAt: "desc" }],
-    take: 6,
-  });
+      orderBy: [{ completenessScore: "desc" }, { updatedAt: "desc" }],
+      take: 6,
+    }),
+  ]);
 
   return (
     <>
@@ -97,25 +102,28 @@ export default async function LandingPage() {
           </p>
         </section>
 
+        {/* ── Métricas ─────────────────────────────────────────────── */}
         <section
-          aria-labelledby="value-props"
-          className="container-hero grid gap-10 border-t border-graphite-line py-16 sm:grid-cols-4"
+          aria-labelledby="metrics"
+          className="container-hero border-t border-graphite-line py-16"
         >
-          <h2 id="value-props" className="sr-only">
-            Propuesta de valor
-          </h2>
-          {[
-            { icon: Sparkles, title: "IA editorial", text: "Perfil generado en 60s con bio, caché y tags." },
-            { icon: CalendarCheck, title: "Disponibilidad real", text: "Calendario sincronizado, fin del partido de tenis." },
-            { icon: Users, title: "Matching directo", text: "Promotoras y artistas sin intermediarios." },
-            { icon: FileSignature, title: "Contratos y facturas", text: "Firma digital y documentación centralizada." },
-          ].map(({ icon: Icon, title, text }) => (
-            <article key={title} className="flex flex-col gap-3">
-              <Icon aria-hidden className="h-6 w-6 text-accent" />
-              <h3 className="text-base font-extrabold">{title}</h3>
-              <p className="text-sm text-paper-dim">{text}</p>
-            </article>
-          ))}
+          <h2 id="metrics" className="sr-only">Bukmi en números</h2>
+          <dl className="grid grid-cols-3 gap-8 text-center">
+            {[
+              { value: artistCount,  label: "Artistas" },
+              { value: promoterCount, label: "Promotoras" },
+              { value: bookedCount,  label: "Conciertos cerrados" },
+            ].map(({ value, label }) => (
+              <div key={label} className="flex flex-col gap-2">
+                <dt className="text-xs uppercase tracking-[0.2em] text-paper-mute order-last">
+                  {label}
+                </dt>
+                <dd className="text-5xl font-extrabold tabular-nums text-accent sm:text-6xl">
+                  {value.toLocaleString("es-ES")}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </section>
 
         {/* ── Cómo funciona ───────────────────────────────────────── */}
