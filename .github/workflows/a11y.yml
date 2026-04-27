@@ -1,0 +1,70 @@
+name: Accessibility (WCAG 2.1 AA)
+
+on:
+  # Run on every push to staging — after Vercel deploys the new version
+  push:
+    branches: [staging]
+  # Run weekly so regressions from dep updates are caught
+  schedule:
+    - cron: "0 8 * * 1" # Mondays 08:00 UTC
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL to test against (default: staging)"
+        required: false
+        default: "https://staging.bukmi.pro"
+
+# Only allow one concurrent run per branch — cancel stale runs
+concurrency:
+  group: a11y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  axe:
+    name: axe-core — WCAG 2.1 AA
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for staging deployment
+        # Give Vercel up to 3 minutes to finish deploying after the push
+        if: github.event_name == 'push'
+        run: |
+          echo "Waiting 90 s for Vercel to deploy..."
+          sleep 90
+          # Verify the deployment is up
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.BASE_URL }})
+            echo "HTTP $STATUS from ${{ env.BASE_URL }}"
+            [ "$STATUS" = "200" ] && break
+            sleep 30
+          done
+
+      - name: Run axe accessibility tests
+        run: npx playwright test tests/a11y/
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://staging.bukmi.pro' }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-a11y-report
+          path: playwright-report/
+          retention-days: 14
