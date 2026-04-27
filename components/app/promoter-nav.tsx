@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Search,
+  CalendarPlus,
   Inbox,
   Building2,
   BarChart3,
@@ -25,6 +26,7 @@ type NavItem = {
 const baseItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/dashboard/buscar", label: "Buscar artistas", Icon: Search },
+  { href: "/dashboard/casting", label: "+ Nuevo Evento", Icon: CalendarPlus },
   { href: "/dashboard/propuestas", label: "Mis propuestas", Icon: Inbox },
   { href: "/dashboard/notificaciones", label: "Notificaciones", Icon: Bell, badgeable: true },
   { href: "/dashboard/analiticas", label: "Analíticas", Icon: BarChart3 },

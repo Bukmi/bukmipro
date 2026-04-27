@@ -84,6 +84,18 @@ enum MessageSender {
   SYSTEM
 }
 
+enum CastingStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model User {
   id                String             @id @default(cuid())
   email             String             @unique
@@ -160,12 +172,13 @@ model ArtistProfile {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  media         Media[]
-  riders        Rider[]
-  availability  Availability[]
-  proposals     BookingRequest[]
-  representedBy ArtistRepresentation[]
-  views         ProfileView[]
+  media                Media[]
+  riders               Rider[]
+  availability         Availability[]
+  proposals            BookingRequest[]
+  representedBy        ArtistRepresentation[]
+  views                ProfileView[]
+  castingApplications  CastingApplication[]
 }
 
 model ProfileView {
@@ -235,9 +248,10 @@ model PromoterProfile {
   verified     Boolean     @default(false)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
-  venues       Venue[]
-  proposals    BookingRequest[]
-  roster       ArtistRepresentation[]
+  venues        Venue[]
+  proposals     BookingRequest[]
+  roster        ArtistRepresentation[]
+  castingCalls  CastingCall[]
 }
 
 model ArtistRepresentation {
@@ -327,6 +341,43 @@ model BookingReview {
 
   @@unique([bookingId, perspective])
   @@index([bookingId])
+}
+
+model CastingCall {
+  id             String          @id @default(cuid())
+  promoterId     String
+  promoter       PromoterProfile @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  title          String
+  venueName      String
+  venueCity      String
+  eventDate      DateTime        @db.Date
+  formatType     FormatType?
+  estimatedCache Int?
+  currency       String          @default("EUR")
+  description    String?
+  applyDeadline  DateTime
+  status         CastingStatus   @default(OPEN)
+  applications   CastingApplication[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([status, applyDeadline])
+  @@index([promoterId])
+}
+
+model CastingApplication {
+  id              String            @id @default(cuid())
+  castingCallId   String
+  castingCall     CastingCall       @relation(fields: [castingCallId], references: [id], onDelete: Cascade)
+  artistProfileId String
+  artistProfile   ArtistProfile     @relation(fields: [artistProfileId], references: [id], onDelete: Cascade)
+  status          ApplicationStatus @default(PENDING)
+  message         String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([castingCallId, artistProfileId])
+  @@index([artistProfileId])
 }
 
 // NextAuth tables (Prisma adapter minimal set)
