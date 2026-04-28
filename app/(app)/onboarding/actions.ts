@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { auth, unstable_update } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { computeCompleteness } from "@/lib/artist";
@@ -49,6 +49,9 @@ export async function skipOnboarding() {
     where: { id: user.id },
     data: { onboardingStatus: "COMPLETED" },
   });
+
+  // Fuerza refresco del JWT para que el middleware vea onboardingStatus: COMPLETED
+  await unstable_update({});
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
@@ -159,6 +162,8 @@ export async function completeArtistOnboarding(
     data: { onboardingStatus: "COMPLETED" },
   });
 
+  await unstable_update({});
+
   revalidatePath("/dashboard");
   redirect("/onboarding/bienvenida");
 }
@@ -233,6 +238,8 @@ export async function completeOfficeOnboarding(
     data: { onboardingStatus: "COMPLETED" },
   });
 
+  await unstable_update({});
+
   revalidatePath("/dashboard");
   if (unknownSlugs.length > 0) {
     return {
@@ -303,6 +310,8 @@ export async function completePromoterOnboarding(
     where: { id: user.id },
     data: { onboardingStatus: "COMPLETED" },
   });
+
+  await unstable_update({});
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
