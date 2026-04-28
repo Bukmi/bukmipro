@@ -65,16 +65,18 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
                   label="Formato"
                   required
                   error={state?.fieldErrors?.formatType}
-                  hint="SOLO para artista individual, BAND para banda, DJ para DJ sets."
+                  hint="Elige el formato que mejor describe tu actuación."
                 >
                   <select
                     name="formatType"
-                    defaultValue="SOLO"
+                    defaultValue="SOLISTA"
                     className="h-11 rounded-xl border border-graphite-line bg-graphite-soft px-4 text-paper focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-graphite"
                   >
-                    <option value="SOLO">Solo / Cantautor</option>
-                    <option value="BAND">Banda</option>
-                    <option value="DJ">DJ</option>
+                    <option value="SOLISTA">Solista</option>
+                    <option value="DUO">Dúo</option>
+                    <option value="TRIO">Trío</option>
+                    <option value="GRUPO">Grupo (3-10 pax)</option>
+                    <option value="COMPANIA">Compañía (+10 pax)</option>
                   </select>
                 </Field>
                 <Field id="baseCity" label="Ciudad base" required error={state?.fieldErrors?.baseCity} className="sm:col-span-2">

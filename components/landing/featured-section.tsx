@@ -12,7 +12,7 @@ type FeaturedArtist = {
   id: string;
   slug: string;
   stageName: string;
-  formatType: "SOLO" | "BAND" | "DJ";
+  formatType: "SOLISTA" | "DUO" | "TRIO" | "GRUPO" | "COMPANIA";
   category: PerformanceCategoryValue;
   baseCity: string | null;
   genres: string[];

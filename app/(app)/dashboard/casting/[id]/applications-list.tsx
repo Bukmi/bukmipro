@@ -39,7 +39,7 @@ const APP_LABEL: Record<ApplicationStatus, string> = {
   ACCEPTED: "Seleccionado",
   REJECTED: "Rechazado",
 };
-const FORMAT_LABEL: Record<FormatType, string> = { SOLO: "Solo", BAND: "Banda", DJ: "DJ" };
+const FORMAT_LABEL: Record<FormatType, string> = { SOLISTA: "Solista", DUO: "Dúo", TRIO: "Trío", GRUPO: "Grupo (3-10 pax)", COMPANIA: "Compañía (+10 pax)" };
 
 function formatCache(min: number | null, max: number | null, currency: string) {
   if (!min && !max) return "Caché a negociar";

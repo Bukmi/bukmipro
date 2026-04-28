@@ -39,7 +39,7 @@ export default async function ArtistDetailForPromoter({ params }: { params: Para
 
       <header className="flex flex-col gap-3">
         <p className="text-xs uppercase tracking-[0.2em] text-accent">
-          {artist.formatType === "SOLO" ? "Solo / Cantautor" : artist.formatType === "BAND" ? "Banda" : "DJ"}
+          {{ SOLISTA: "Solista", DUO: "Dúo", TRIO: "Trío", GRUPO: "Grupo (3-10 pax)", COMPANIA: "Compañía (+10 pax)" }[artist.formatType] ?? artist.formatType}
         </p>
         <h1 className="text-hero">{artist.stageName}</h1>
         <div className="flex flex-wrap gap-5 text-sm text-paper-dim">

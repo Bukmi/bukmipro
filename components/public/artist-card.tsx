@@ -6,7 +6,7 @@ import { CoverImage } from "./cover-image";
 type ArtistCardData = {
   slug: string;
   stageName: string;
-  formatType: "SOLO" | "BAND" | "DJ";
+  formatType: "SOLISTA" | "DUO" | "TRIO" | "GRUPO" | "COMPANIA";
   baseCity: string | null;
   genres: string[];
   cacheMin: number | null;
@@ -18,9 +18,11 @@ type ArtistCardData = {
 };
 
 const FORMAT_LABEL: Record<ArtistCardData["formatType"], string> = {
-  SOLO: "Solo",
-  BAND: "Banda",
-  DJ: "DJ",
+  SOLISTA: "Solista",
+  DUO: "Dúo",
+  TRIO: "Trío",
+  GRUPO: "Grupo (3-10 pax)",
+  COMPANIA: "Compañía (+10 pax)",
 };
 
 export function ArtistCard({

@@ -43,9 +43,11 @@ export function CreateCastingForm() {
             className="h-11 rounded-xl border border-graphite-line bg-graphite-soft px-4 text-paper focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-graphite"
           >
             <option value="">Cualquier formato</option>
-            <option value="SOLO">Solo / Cantautor</option>
-            <option value="BAND">Banda</option>
-            <option value="DJ">DJ</option>
+            <option value="SOLISTA">Solista</option>
+            <option value="DUO">Dúo</option>
+            <option value="TRIO">Trío</option>
+            <option value="GRUPO">Grupo (3-10 pax)</option>
+            <option value="COMPANIA">Compañía (+10 pax)</option>
           </select>
         </Field>
       </div>

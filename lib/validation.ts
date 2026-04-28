@@ -53,7 +53,7 @@ export const performanceCategoryEnum = z.enum([
 export const artistOnboardingSchema = z.object({
   stageName: z.string().min(2).max(80),
   category: performanceCategoryEnum.default("LIVE_MUSIC"),
-  formatType: z.enum(["SOLO", "BAND", "DJ"]),
+  formatType: z.enum(["SOLISTA", "DUO", "TRIO", "GRUPO", "COMPANIA"]),
   baseCity: z.string().min(2).max(80),
   genres: z.array(z.string()).min(1, { message: "Elige al menos un género" }).max(5),
   bio: z.string().max(1200).optional().transform((v) => v?.trim() || null),
@@ -83,7 +83,7 @@ const urlOrEmpty = z
 export const artistProfileSchema = z.object({
   stageName: z.string().min(2).max(80),
   category: performanceCategoryEnum.optional().default("LIVE_MUSIC"),
-  formatType: z.enum(["SOLO", "BAND", "DJ"]),
+  formatType: z.enum(["SOLISTA", "DUO", "TRIO", "GRUPO", "COMPANIA"]),
   baseCity: z.string().min(2).max(80),
   radiusKm: z.coerce.number().int().min(0).max(5000).default(150),
   bio: z.string().max(1200).optional().transform((v) => v?.trim() || null),
@@ -191,7 +191,7 @@ export const searchFiltersSchema = z.object({
   q: z.string().max(80).optional(),
   city: z.string().max(80).optional(),
   genre: z.string().max(40).optional(),
-  formatType: z.enum(["SOLO", "BAND", "DJ"]).optional(),
+  formatType: z.enum(["SOLISTA", "DUO", "TRIO", "GRUPO", "COMPANIA"]).optional(),
   maxCache: z.coerce.number().int().min(0).max(500_000).optional(),
   availableOn: z
     .string()

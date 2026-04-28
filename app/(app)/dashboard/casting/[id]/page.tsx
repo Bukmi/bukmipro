@@ -21,7 +21,7 @@ const STATUS_TONE: Record<CastingStatus, string> = {
   CANCELLED: "bg-danger/20 text-danger",
 };
 
-const FORMAT_LABEL: Record<string, string> = { SOLO: "Solo / Cantautor", BAND: "Banda", DJ: "DJ" };
+const FORMAT_LABEL: Record<string, string> = { SOLISTA: "Solista", DUO: "Dúo", TRIO: "Trío", GRUPO: "Grupo (3-10 pax)", COMPANIA: "Compañía (+10 pax)" };
 
 function formatDate(d: Date) {
   return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(d);
