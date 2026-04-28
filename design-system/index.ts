@@ -1,5 +1,11 @@
 /**
- * Bukmi Design System — v1.0.0
+ * Brightside — Bukmi Design System v1.0.0
+ *
+ * Brightside is Bukmi's design system — a dark-mode-first visual language
+ * built for a marketplace that connects artists with promoters.
+ * Named after the acid yellow-green accent that lights up every interface,
+ * Brightside keeps things sharp, accessible and fast: high-contrast surfaces,
+ * a single expressive brand colour, and zero decorative noise.
  *
  * Single source of truth for all design tokens.
  * These values mirror tailwind.config.ts and globals.css exactly.
