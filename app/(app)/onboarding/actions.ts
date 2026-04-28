@@ -38,6 +38,7 @@ export async function skipOnboarding() {
       stageName: emailLocal,
       slug,
       formatType: "SOLO",
+      category: "LIVE_MUSIC",
       completenessScore: 0,
       published: false,
     },
