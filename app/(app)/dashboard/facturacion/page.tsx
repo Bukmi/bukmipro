@@ -62,8 +62,7 @@ export default async function FacturacionPage({
           aria-live="polite"
           className="rounded-2xl bg-success/15 p-4 text-sm text-success"
         >
-          Pago recibido. La suscripción puede tardar unos segundos en reflejarse
-          si el webhook aún no ha llegado.
+          ¡Todo listo! Tu suscripción está activa. Si no ves el plan actualizado, espera unos segundos y recarga la página.
         </p>
       )}
       {sp.checkout === "cancelled" && (
