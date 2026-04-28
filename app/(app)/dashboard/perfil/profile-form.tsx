@@ -8,6 +8,7 @@ import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { GenrePicker } from "@/components/onboarding/genre-picker";
 import { GENRES } from "@/app/(app)/onboarding/genres";
+import { PERFORMANCE_CATEGORIES } from "@/lib/categories";
 import { saveArtistProfile, type SaveArtistState } from "./actions";
 
 export function ProfileForm({ profile }: { profile: ArtistProfile }) {
@@ -16,6 +17,7 @@ export function ProfileForm({ profile }: { profile: ArtistProfile }) {
     {}
   );
   const [bioLen, setBioLen] = useState((profile.bio ?? "").length);
+  const [selectedCategory, setSelectedCategory] = useState(profile.category ?? "LIVE_MUSIC");
 
   return (
     <form action={formAction} noValidate className="flex flex-col gap-8">
@@ -44,6 +46,33 @@ export function ProfileForm({ profile }: { profile: ArtistProfile }) {
         <Field id="radiusKm" label="Radio de giras (km)" error={state?.fieldErrors?.radiusKm} hint="Hasta dónde aceptas bolos sin cobrar extra de desplazamiento.">
           <Input name="radiusKm" type="number" min={0} max={5000} defaultValue={profile.radiusKm ?? 150} />
         </Field>
+
+        {/* Categoría artística */}
+        <div className="sm:col-span-2 flex flex-col gap-2">
+          <span className="text-sm font-semibold text-paper">Categoría artística</span>
+          <input type="hidden" name="category" value={selectedCategory} />
+          <div className="flex flex-wrap gap-2">
+            {PERFORMANCE_CATEGORIES.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                onClick={() => setSelectedCategory(c.value)}
+                aria-pressed={selectedCategory === c.value}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite ${
+                  selectedCategory === c.value
+                    ? "border-accent bg-accent/15 text-accent"
+                    : "border-graphite-line text-paper-dim hover:border-accent hover:text-accent"
+                }`}
+              >
+                <span aria-hidden>{c.emoji}</span>
+                {c.label}
+              </button>
+            ))}
+          </div>
+          {state?.fieldErrors?.category && (
+            <p role="alert" className="text-sm text-danger">{state.fieldErrors.category}</p>
+          )}
+        </div>
       </section>
 
       <section aria-labelledby="bio" className="flex flex-col gap-3">
