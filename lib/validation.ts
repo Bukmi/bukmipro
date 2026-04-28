@@ -55,7 +55,7 @@ export const artistOnboardingSchema = z.object({
   category: performanceCategoryEnum.default("LIVE_MUSIC"),
   formatType: z.enum(["SOLISTA", "DUO", "TRIO", "GRUPO", "COMPANIA"]),
   baseCity: z.string().min(2).max(80),
-  genres: z.array(z.string()).min(1, { message: "Elige al menos un género" }).max(5),
+  genres: z.array(z.string()).min(1, { message: "Elige al menos un género" }).max(8),
   bio: z.string().max(1200).optional().transform((v) => v?.trim() || null),
   spotifyUrl: urlOrEmptyOnboarding,
   youtubeUrl: urlOrEmptyOnboarding,

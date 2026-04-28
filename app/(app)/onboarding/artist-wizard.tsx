@@ -89,10 +89,10 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
           {
             id: "genres",
             title: "Géneros musicales",
-            description: "Elige hasta 5. Las promotoras filtran por esto.",
+            description: "Elige hasta 8. Las promotoras filtran por esto.",
             content: (
               <div>
-                <GenrePicker name="genres" options={GENRES} max={5} describedBy="genres-error" />
+                <GenrePicker name="genres" options={GENRES} max={8} describedBy="genres-error" />
                 {state?.fieldErrors?.genres && (
                   <p id="genres-error" role="alert" className="mt-3 text-sm font-semibold text-danger">
                     {state.fieldErrors.genres}
@@ -234,9 +234,9 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
                       className="mt-0.5 h-4 w-4 accent-accent"
                     />
                     <div>
-                      <p className="text-sm font-semibold text-paper">Mostrar caché al público</p>
+                      <p className="text-sm font-semibold text-paper">Mostrar caché a promotoras</p>
                       <p className="text-xs text-paper-dim">
-                        Si lo desactivas aparecerá «Caché no disponible» en tu perfil. El filtro de presupuesto para promotoras sigue funcionando.
+                        Si lo desactivas aparecerá «Caché no disponible» en tu perfil. El filtro de presupuesto sigue funcionando internamente.
                       </p>
                     </div>
                   </label>
