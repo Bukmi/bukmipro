@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { ArtistCard } from "@/components/public/artist-card";
 import {
   PERFORMANCE_CATEGORIES,
@@ -27,26 +26,40 @@ type FeaturedArtist = {
 
 export function FeaturedSection({ artists }: { artists: FeaturedArtist[] }) {
   const [activeCategory, setActiveCategory] = useState<PerformanceCategoryValue | null>(null);
-
-  const filtered = activeCategory
-    ? artists.filter((a) => a.category === activeCategory)
-    : artists;
+  const [activeSubGenre, setActiveSubGenre] = useState<string | null>(null);
 
   const subGenres = activeCategory ? CATEGORY_SUBGENRES[activeCategory] : [];
 
+  const filtered = artists.filter((a) => {
+    if (activeCategory && a.category !== activeCategory) return false;
+    if (activeSubGenre && !a.genres.some((g) => g.toLowerCase() === activeSubGenre.toLowerCase())) return false;
+    return true;
+  });
+
+  function selectCategory(value: PerformanceCategoryValue | null) {
+    setActiveCategory(value);
+    setActiveSubGenre(null); // reset sub-filtro al cambiar categoría
+  }
+
+  const tabBase =
+    "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite";
+  const tabActive = "border-accent bg-accent text-accent-ink";
+  const tabIdle = "border-graphite-line text-paper-dim hover:border-accent hover:text-accent";
+
+  const pillBase =
+    "inline-flex items-center rounded-full border px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite";
+  const pillActive = "border-accent bg-accent/15 text-accent font-semibold";
+  const pillIdle = "border-graphite-line text-paper-dim hover:border-accent hover:text-accent";
+
   return (
     <div className="flex flex-col gap-8">
-      {/* ── Tabs de primer nivel ────────────────────────────── */}
-      <nav aria-label="Categorías" className="flex flex-wrap gap-2">
+      {/* ── Tabs de primer nivel ─────────────────────────────── */}
+      <div role="group" aria-label="Categorías" className="flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={() => setActiveCategory(null)}
+          onClick={() => selectCategory(null)}
           aria-pressed={!activeCategory}
-          className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite ${
-            !activeCategory
-              ? "border-accent bg-accent text-accent-ink"
-              : "border-graphite-line text-paper-dim hover:border-accent hover:text-accent"
-          }`}
+          className={`${tabBase} ${!activeCategory ? tabActive : tabIdle}`}
         >
           Todos
         </button>
@@ -54,21 +67,42 @@ export function FeaturedSection({ artists }: { artists: FeaturedArtist[] }) {
           <button
             key={c.value}
             type="button"
-            onClick={() => setActiveCategory(c.value)}
+            onClick={() => selectCategory(c.value)}
             aria-pressed={activeCategory === c.value}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite ${
-              activeCategory === c.value
-                ? "border-accent bg-accent text-accent-ink"
-                : "border-graphite-line text-paper-dim hover:border-accent hover:text-accent"
-            }`}
+            className={`${tabBase} ${activeCategory === c.value ? tabActive : tabIdle}`}
           >
             <span aria-hidden>{c.emoji}</span>
             {c.label}
           </button>
         ))}
-      </nav>
+      </div>
 
-      {/* ── Grid de artistas ────────────────────────────────── */}
+      {/* ── Sub-estilos contextuales ──────────────────────────── */}
+      {subGenres.length > 0 && (
+        <div role="group" aria-label="Estilos" className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveSubGenre(null)}
+            aria-pressed={!activeSubGenre}
+            className={`${pillBase} ${!activeSubGenre ? pillActive : pillIdle}`}
+          >
+            Todos los estilos
+          </button>
+          {subGenres.map(({ label }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setActiveSubGenre(activeSubGenre === label ? null : label)}
+              aria-pressed={activeSubGenre === label}
+              className={`${pillBase} ${activeSubGenre === label ? pillActive : pillIdle}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Grid de artistas ─────────────────────────────────── */}
       {filtered.length > 0 ? (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.slice(0, 6).map((a) => (
@@ -95,33 +129,6 @@ export function FeaturedSection({ artists }: { artists: FeaturedArtist[] }) {
         <p className="py-8 text-center text-paper-mute">
           Aún no hay artistas en esta categoría. ¡Sé el primero!
         </p>
-      )}
-
-      {/* ── Sub-estilos contextuales ─────────────────────────── */}
-      {subGenres.length > 0 && (
-        <nav
-          aria-label={`Estilos de ${PERFORMANCE_CATEGORIES.find((c) => c.value === activeCategory)?.label}`}
-          className="flex flex-wrap gap-2 border-t border-graphite-line pt-6"
-        >
-          {subGenres.map(({ label, genreSlug }) =>
-            genreSlug ? (
-              <Link
-                key={label}
-                href={`/generos/${genreSlug}`}
-                className="inline-flex items-center rounded-full border border-graphite-line px-3 py-1 text-sm text-paper-dim transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              >
-                {label}
-              </Link>
-            ) : (
-              <span
-                key={label}
-                className="inline-flex items-center rounded-full border border-graphite-line px-3 py-1 text-sm text-paper-mute"
-              >
-                {label}
-              </span>
-            )
-          )}
-        </nav>
       )}
     </div>
   );
