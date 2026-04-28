@@ -71,9 +71,9 @@ const plans: Plan[] = [
   {
     id: "oficina",
     name: "Oficina",
-    price: "desde 19,99 €",
-    period: "/ artista / mes",
-    description: "Para mánagers y oficinas de booking que gestionan varios artistas. 20% de descuento sobre el plan PRO.",
+    price: "−20%",
+    period: "sobre el plan PRO",
+    description: "Para mánagers y oficinas de booking que gestionan varios artistas. Paga 39,99 € / artista / mes en lugar de 49,99 €.",
     cta: "Hablar con el equipo",
     ctaHref: "mailto:hola@bukmi.pro?subject=Plan%20Oficina",
     highlight: false,
@@ -81,7 +81,7 @@ const plans: Plan[] = [
       "Gestión centralizada de roster",
       "Un panel por artista",
       "Facturación consolidada",
-      "20% de descuento sobre PRO",
+      "Todo lo del plan PRO",
       "Acceso a estadísticas del roster",
       "Soporte dedicado",
     ],
@@ -136,7 +136,7 @@ export default function PreciosPage() {
                   {plan.name}
                 </h3>
                 <div className="mt-4 flex items-end gap-1">
-                  <span className={`text-4xl font-extrabold tabular-nums ${plan.highlight ? "text-graphite" : "text-paper"}`}>
+                  <span className={`font-extrabold ${plan.id === "oficina" ? "text-5xl text-accent" : "text-4xl tabular-nums"} ${plan.highlight ? "text-graphite" : plan.id === "oficina" ? "" : "text-paper"}`}>
                     {plan.price}
                   </span>
                   <span className={`mb-1 text-sm ${plan.highlight ? "text-graphite/60" : "text-paper-dim"}`}>
