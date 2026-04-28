@@ -25,6 +25,7 @@ export default async function AnaliticasPage() {
   }> = [];
   let perspective: "ARTIST" | "PROMOTER" = "PROMOTER";
   let views: { last30: number; last90: number } | null = null;
+  let proposalsLast30 = 0;
 
   if (role === "ARTIST") {
     perspective = "ARTIST";
@@ -45,6 +46,9 @@ export default async function AnaliticasPage() {
       }),
     ]);
     views = { last30, last90 };
+    proposalsLast30 = await prisma.bookingRequest.count({
+      where: { artistProfileId: artist.id, createdAt: { gte: cutoff30 } },
+    });
     const rows = await prisma.bookingRequest.findMany({
       where: { artistProfileId: artist.id },
       select: {
@@ -104,6 +108,9 @@ export default async function AnaliticasPage() {
   const bookedCount = breakdown.BOOKED;
   const rejectedCount = breakdown.REJECTED + breakdown.CANCELLED;
   const conversion = total === 0 ? 0 : Math.round((bookedCount / total) * 100);
+  // Response rate: proposals that moved past INQUIRY / total received
+  const responded = total - breakdown.INQUIRY;
+  const responseRate = total === 0 ? 0 : Math.round((responded / total) * 100);
   const confirmedEuros = confirmedAmount(bookings);
   const monthly = bucketByMonth(bookings, 6);
   const peakTotal = Math.max(1, ...monthly.map((b) => b.total));
@@ -117,7 +124,9 @@ export default async function AnaliticasPage() {
     { label: "Propuestas totales", value: String(total) },
     { label: "Confirmadas (BOOKED)", value: String(bookedCount), hint: `${conversion}% de conversión` },
     { label: "Importe confirmado", value: fmtEur.format(confirmedEuros) },
-    { label: "Descartadas", value: String(rejectedCount), hint: "Rechazadas + canceladas" },
+    ...(perspective === "ARTIST"
+      ? [{ label: "Tasa de respuesta", value: `${responseRate}%`, hint: "Propuestas gestionadas vs. recibidas" }]
+      : [{ label: "Descartadas", value: String(rejectedCount), hint: "Rechazadas + canceladas" }]),
   ];
 
   return (
@@ -154,17 +163,21 @@ export default async function AnaliticasPage() {
       {views && (
         <article className="flex flex-col gap-3 rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
           <header className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-base font-extrabold">Visitas a tu perfil público</h2>
-            <p className="text-xs text-paper-mute">Deduplicadas por sesión</p>
+            <h2 className="text-base font-extrabold">Visibilidad — últimos 30 días</h2>
+            <p className="text-xs text-paper-mute">Visitas deduplicadas por sesión</p>
           </header>
-          <dl className="grid gap-4 sm:grid-cols-2">
+          <dl className="grid gap-4 sm:grid-cols-3">
             <div className="flex flex-col gap-1 rounded-xl bg-graphite p-4 ring-1 ring-graphite-line">
-              <dt className="text-xs uppercase tracking-wide text-paper-mute">Últimos 30 días</dt>
+              <dt className="text-xs uppercase tracking-wide text-paper-mute">Visitas (30 d)</dt>
               <dd className="text-2xl font-extrabold text-paper">{views.last30}</dd>
             </div>
             <div className="flex flex-col gap-1 rounded-xl bg-graphite p-4 ring-1 ring-graphite-line">
-              <dt className="text-xs uppercase tracking-wide text-paper-mute">Últimos 90 días</dt>
+              <dt className="text-xs uppercase tracking-wide text-paper-mute">Visitas (90 d)</dt>
               <dd className="text-2xl font-extrabold text-paper">{views.last90}</dd>
+            </div>
+            <div className="flex flex-col gap-1 rounded-xl bg-graphite p-4 ring-1 ring-graphite-line">
+              <dt className="text-xs uppercase tracking-wide text-paper-mute">Propuestas recibidas (30 d)</dt>
+              <dd className="text-2xl font-extrabold text-paper">{proposalsLast30}</dd>
             </div>
           </dl>
         </article>

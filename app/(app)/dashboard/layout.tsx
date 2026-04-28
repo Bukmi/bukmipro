@@ -32,10 +32,12 @@ export default async function DashboardLayout({
     return (
       <div className="flex flex-col gap-6">
         {status && <PlanBanner status={status} />}
-        <div className="grid gap-10 lg:grid-cols-[220px_1fr]">
+        <div className="flex flex-col gap-6 lg:grid lg:gap-10 lg:grid-cols-[220px_1fr]">
           <aside aria-label="Barra lateral" className="flex flex-col gap-6">
             <ArtistNav publicSlug={artist.slug} unreadCount={unreadCount} />
-            <CompletenessWidget score={artist.completenessScore} />
+            <div className="hidden lg:block">
+              <CompletenessWidget score={artist.completenessScore} />
+            </div>
           </aside>
           <div className="min-h-[60vh]">{children}</div>
         </div>
@@ -47,7 +49,7 @@ export default async function DashboardLayout({
     return (
       <div className="flex flex-col gap-6">
         {status && <PlanBanner status={status} />}
-        <div className="grid gap-10 lg:grid-cols-[220px_1fr]">
+        <div className="flex flex-col gap-6 lg:grid lg:gap-10 lg:grid-cols-[220px_1fr]">
           <aside aria-label="Barra lateral" className="flex flex-col gap-6">
             <PromoterNav role={role} unreadCount={unreadCount} />
           </aside>
