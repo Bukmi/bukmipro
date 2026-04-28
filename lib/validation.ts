@@ -51,6 +51,7 @@ export const artistOnboardingSchema = z.object({
   formatType: z.enum(["SOLO", "BAND", "DJ"]),
   baseCity: z.string().min(2).max(80),
   genres: z.array(z.string()).min(1, { message: "Elige al menos un género" }).max(5),
+  bio: z.string().max(1200).optional().transform((v) => v?.trim() || null),
   spotifyUrl: urlOrEmptyOnboarding,
   youtubeUrl: urlOrEmptyOnboarding,
   instagramUrl: urlOrEmptyOnboarding,

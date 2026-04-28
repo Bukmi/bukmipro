@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { Stepper } from "@/components/onboarding/stepper";
@@ -8,11 +8,15 @@ import { GenrePicker } from "@/components/onboarding/genre-picker";
 import { GENRES } from "./genres";
 import { completeArtistOnboarding, type OnboardingState } from "./actions";
 
+const BIO_MIN = 80;
+const BIO_MAX = 1200;
+
 export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
   const [state, formAction, pending] = useActionState<OnboardingState, FormData>(
     completeArtistOnboarding,
     {}
   );
+  const [bioLen, setBioLen] = useState(0);
 
   return (
     <form action={formAction} noValidate>
@@ -65,6 +69,49 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
                     {state.fieldErrors.genres}
                   </p>
                 )}
+              </div>
+            ),
+          },
+          {
+            id: "bio",
+            title: "Preséntate (opcional)",
+            description:
+              "Tu bio es lo primero que lee una promotora. 80 caracteres son suficientes para empezar.",
+            content: (
+              <div className="flex flex-col gap-3">
+                <Field
+                  id="bio"
+                  label="Bio artística"
+                  hint={
+                    bioLen < BIO_MIN
+                      ? `Mínimo recomendado: ${BIO_MIN} caracteres para subir tu puntuación de perfil`
+                      : "¡Suficiente para destacar!"
+                  }
+                  error={state?.fieldErrors?.bio}
+                >
+                  <textarea
+                    id="bio"
+                    name="bio"
+                    rows={5}
+                    maxLength={BIO_MAX}
+                    placeholder="Cuéntanos quién eres, qué tipo de shows haces y qué hace especial tu directo. Las promotoras valoran la autenticidad."
+                    onChange={(e) => setBioLen(e.target.value.length)}
+                    className="w-full rounded-xl border border-graphite-line bg-graphite-soft px-4 py-3 text-paper placeholder:text-paper-mute focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-graphite resize-none"
+                  />
+                </Field>
+                <div className="flex items-center justify-between text-xs">
+                  <span
+                    className={bioLen > 0 && bioLen < BIO_MIN ? "text-accent" : "text-paper-mute"}
+                  >
+                    {bioLen > 0 && bioLen < BIO_MIN && `Faltan ${BIO_MIN - bioLen} caracteres para el mínimo recomendado`}
+                  </span>
+                  <span className={bioLen > BIO_MAX * 0.9 ? "text-danger" : "text-paper-mute"}>
+                    {bioLen} / {BIO_MAX}
+                  </span>
+                </div>
+                <p className="text-xs text-paper-dim">
+                  También puedes saltarte este paso y completarlo desde el editor de perfil.
+                </p>
               </div>
             ),
           },

@@ -22,6 +22,12 @@ export function SiteHeader() {
           >
             Artistas
           </Link>
+          <Link
+            href="/precios"
+            className="hidden rounded-xl px-3 py-2 text-sm text-paper-dim hover:text-paper sm:inline-flex"
+          >
+            Precios
+          </Link>
           <Button asChild variant="ghost" size="sm">
             <Link href="/login">Iniciar sesión</Link>
           </Button>

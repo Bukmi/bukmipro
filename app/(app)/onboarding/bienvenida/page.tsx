@@ -1,11 +1,23 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CheckCircle2, Image as ImageIcon, Calendar, Eye } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import { CheckCircle2, Image as ImageIcon, Calendar, Eye, Rocket } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "¡Bienvenido a Bukmi!" };
+
+async function publishProfile() {
+  "use server";
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  await prisma.artistProfile.update({
+    where: { userId: session.user.id },
+    data: { published: true },
+  });
+  revalidatePath("/onboarding/bienvenida");
+}
 
 type NextStep = {
   href: string;
@@ -26,6 +38,7 @@ export default async function BienvenidaPage() {
       slug: true,
       stageName: true,
       completenessScore: true,
+      published: true,
       spotifyUrl: true,
       youtubeUrl: true,
       instagramUrl: true,
@@ -35,7 +48,6 @@ export default async function BienvenidaPage() {
     },
   });
 
-  // Only for artists — promoters go directly to dashboard
   if (!artist) redirect("/dashboard");
 
   const score = artist.completenessScore;
@@ -77,6 +89,38 @@ export default async function BienvenidaPage() {
         Tu cuenta está lista. Ahora completa estos pasos para que las promotoras puedan encontrarte.
       </p>
 
+      {/* Publicar perfil — CTA principal */}
+      {!artist.published ? (
+        <div className="mb-8 rounded-2xl border border-accent/40 bg-accent/10 p-6">
+          <div className="flex items-start gap-4">
+            <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/20 text-accent">
+              <Rocket className="h-5 w-5" />
+            </span>
+            <div className="flex-1">
+              <p className="font-semibold text-paper">Publica tu perfil para ser visible</p>
+              <p className="mt-1 text-sm text-paper-dim">
+                Ahora mismo solo tú puedes verlo. Publícalo para aparecer en el buscador de promotoras.
+              </p>
+            </div>
+          </div>
+          <form action={publishProfile} className="mt-4">
+            <Button type="submit" className="w-full sm:w-auto">
+              Publicar perfil ahora →
+            </Button>
+          </form>
+        </div>
+      ) : (
+        <div className="mb-8 flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4">
+          <CheckCircle2 aria-hidden className="h-5 w-5 shrink-0 text-accent" />
+          <div>
+            <p className="text-sm font-semibold text-paper">Perfil publicado — ya apareces en el buscador</p>
+            <Link href={`/artistas/${artist.slug}`} className="text-xs text-accent underline-offset-4 hover:underline">
+              Ver mi perfil público →
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Completeness bar */}
       <div className="mb-10 rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
         <div className="flex items-end justify-between mb-3">
@@ -98,7 +142,7 @@ export default async function BienvenidaPage() {
         </div>
         <p className="mt-3 text-sm text-paper-dim">
           {score < 40
-            ? "Añade una foto y tu disponibilidad para despegar."
+            ? "Añade una bio, foto y tu disponibilidad para despegar."
             : score < 70
             ? "Vas por buen camino. Añade una foto o riders para destacar."
             : "¡Muy bien! Estás entre los perfiles más completos."}

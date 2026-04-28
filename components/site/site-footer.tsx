@@ -8,6 +8,7 @@ export function SiteFooter() {
           © {new Date().getFullYear()} Bukmi · Matching directo entre artistas y quien programa
         </p>
         <nav aria-label="Enlaces legales" className="flex flex-wrap gap-6 text-sm">
+          <Link href="/precios" className="hover:text-accent">Precios</Link>
           <Link href="/legal/terminos" className="hover:text-accent">Términos</Link>
           <Link href="/legal/privacidad" className="hover:text-accent">Privacidad</Link>
           <Link href="/legal/cookies" className="hover:text-accent">Cookies</Link>

@@ -84,16 +84,41 @@ export default async function DashboardPage() {
         </p>
       </header>
 
-      {user.artistProfile && user.artistProfile.completenessScore < 70 && (
+      {user.artistProfile && !user.artistProfile.published && (
+        <aside
+          aria-label="Perfil sin publicar"
+          className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/40 bg-accent/10 px-5 py-4"
+        >
+          <div className="flex items-center gap-3">
+            <span aria-hidden className="text-xl">🚀</span>
+            <div>
+              <p className="text-sm font-semibold text-paper">
+                Tu perfil no está publicado — las promotoras no pueden verte
+              </p>
+              <p className="text-xs text-paper-dim">
+                Publícalo desde el editor de perfil cuando estés listo.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/perfil"
+            className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-graphite hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
+          >
+            Publicar perfil →
+          </Link>
+        </aside>
+      )}
+
+      {user.artistProfile && user.artistProfile.published && user.artistProfile.completenessScore < 70 && (
         <aside
           aria-label="Mejora tu perfil"
-          className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4"
+          className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-graphite-line bg-graphite-soft px-5 py-4"
         >
           <div className="flex items-center gap-3">
             <span aria-hidden className="text-xl">✦</span>
             <div>
               <p className="text-sm font-semibold text-paper">
-                Tu perfil está al {user.artistProfile.completenessScore}% — complétalo para aparecer en más búsquedas
+                Perfil al {user.artistProfile.completenessScore}% — complétalo para aparecer en más búsquedas
               </p>
               <p className="text-xs text-paper-dim">
                 Añade una foto, tu disponibilidad o un rider para subir posiciones.
@@ -102,7 +127,7 @@ export default async function DashboardPage() {
           </div>
           <Link
             href="/dashboard/perfil"
-            className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-graphite hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
+            className="shrink-0 rounded-xl border border-graphite-line px-4 py-2 text-sm font-bold text-paper hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
           >
             Completar perfil →
           </Link>

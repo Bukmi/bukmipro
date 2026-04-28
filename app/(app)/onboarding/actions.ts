@@ -37,6 +37,7 @@ export async function completeArtistOnboarding(
     formatType: String(formData.get("formatType") ?? "SOLO"),
     baseCity: String(formData.get("baseCity") ?? "").trim(),
     genres: formData.getAll("genres").map(String).filter(Boolean),
+    bio: String(formData.get("bio") ?? ""),
     spotifyUrl: String(formData.get("spotifyUrl") ?? ""),
     youtubeUrl: String(formData.get("youtubeUrl") ?? ""),
     instagramUrl: String(formData.get("instagramUrl") ?? ""),
@@ -60,7 +61,7 @@ export async function completeArtistOnboarding(
   }
 
   const completenessScore = computeCompleteness({
-    bio: null,
+    bio: parsed.data.bio ?? null,
     baseCity: parsed.data.baseCity,
     genres: parsed.data.genres,
     cacheMin: parsed.data.cacheMin ?? null,
@@ -82,6 +83,7 @@ export async function completeArtistOnboarding(
       formatType: parsed.data.formatType,
       baseCity: parsed.data.baseCity,
       genres: parsed.data.genres,
+      bio: parsed.data.bio ?? null,
       spotifyUrl: parsed.data.spotifyUrl ?? null,
       youtubeUrl: parsed.data.youtubeUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,
@@ -95,6 +97,7 @@ export async function completeArtistOnboarding(
       formatType: parsed.data.formatType,
       baseCity: parsed.data.baseCity,
       genres: parsed.data.genres,
+      bio: parsed.data.bio ?? null,
       spotifyUrl: parsed.data.spotifyUrl ?? null,
       youtubeUrl: parsed.data.youtubeUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,
