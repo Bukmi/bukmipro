@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import { formatCacheRange } from "@/lib/artist";
+import { CoverImage } from "./cover-image";
 
 type ArtistCardData = {
   slug: string;
@@ -37,21 +38,12 @@ export function ArtistCard({
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-graphite">
         {artist.coverUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={artist.coverUrl}
-            alt=""
-            aria-hidden
-            className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
-          />
+          <CoverImage src={artist.coverUrl} />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-paper-mute">
             Sin foto
           </div>
         )}
-        <span className="absolute left-3 top-3 rounded-full bg-graphite/80 px-2 py-1 text-xs font-bold text-paper backdrop-blur">
-          {artist.completenessScore}%
-        </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <p className="text-xs uppercase tracking-[0.15em] text-accent">
