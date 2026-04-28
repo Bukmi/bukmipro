@@ -162,6 +162,7 @@ model ArtistProfile {
   radiusKm           Int?       @default(150)
   cacheMin           Int?
   cacheMax           Int?
+  cachePublic        Boolean    @default(true)
   currency           String     @default("EUR")
   spotifyUrl         String?
   youtubeUrl         String?

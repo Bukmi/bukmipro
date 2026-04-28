@@ -165,6 +165,7 @@ export default async function ArtistsDirectoryPage({
                       genres: a.genres,
                       cacheMin: a.cacheMin,
                       cacheMax: a.cacheMax,
+                      cachePublic: a.cachePublic,
                       currency: a.currency,
                       completenessScore: a.completenessScore,
                       coverUrl: a.media[0]?.url ?? null,

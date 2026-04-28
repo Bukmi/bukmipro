@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { Stepper } from "@/components/onboarding/stepper";
@@ -8,11 +8,15 @@ import { GenrePicker } from "@/components/onboarding/genre-picker";
 import { GENRES } from "./genres";
 import { completeArtistOnboarding, type OnboardingState } from "./actions";
 
+const BIO_MIN = 80;
+const BIO_MAX = 1200;
+
 export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
   const [state, formAction, pending] = useActionState<OnboardingState, FormData>(
     completeArtistOnboarding,
     {}
   );
+  const [bioLen, setBioLen] = useState(0);
 
   return (
     <form action={formAction} noValidate>
@@ -69,18 +73,158 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
             ),
           },
           {
-            id: "links",
-            title: "Material (opcional)",
+            id: "bio",
+            title: "Preséntate (opcional)",
             description:
-              "En el Sprint 6 la IA generará tu perfil a partir de estos enlaces. Por ahora quedan guardados para después.",
+              "Tu bio es lo primero que lee una promotora. 80 caracteres son suficientes para empezar.",
             content: (
-              <div className="rounded-2xl bg-graphite-soft p-6 ring-1 ring-graphite-line">
-                <p className="font-semibold">Skip por ahora</p>
-                <p className="mt-2 text-sm text-paper-dim">
-                  Puedes completar Spotify, YouTube e Instagram desde el editor
-                  de perfil después. Pulsa <strong>Completar onboarding</strong>{" "}
-                  para entrar al dashboard.
+              <div className="flex flex-col gap-3">
+                <Field
+                  id="bio"
+                  label="Bio artística"
+                  hint={
+                    bioLen < BIO_MIN
+                      ? `Mínimo recomendado: ${BIO_MIN} caracteres para subir tu puntuación de perfil`
+                      : "¡Suficiente para destacar!"
+                  }
+                  error={state?.fieldErrors?.bio}
+                >
+                  <textarea
+                    id="bio"
+                    name="bio"
+                    rows={5}
+                    maxLength={BIO_MAX}
+                    placeholder="Cuéntanos quién eres, qué tipo de shows haces y qué hace especial tu directo. Las promotoras valoran la autenticidad."
+                    onChange={(e) => setBioLen(e.target.value.length)}
+                    className="w-full rounded-xl border border-graphite-line bg-graphite-soft px-4 py-3 text-paper placeholder:text-paper-mute focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-graphite resize-none"
+                  />
+                </Field>
+                <div className="flex items-center justify-between text-xs">
+                  <span
+                    className={bioLen > 0 && bioLen < BIO_MIN ? "text-accent" : "text-paper-mute"}
+                  >
+                    {bioLen > 0 && bioLen < BIO_MIN && `Faltan ${BIO_MIN - bioLen} caracteres para el mínimo recomendado`}
+                  </span>
+                  <span className={bioLen > BIO_MAX * 0.9 ? "text-danger" : "text-paper-mute"}>
+                    {bioLen} / {BIO_MAX}
+                  </span>
+                </div>
+                <p className="text-xs text-paper-dim">
+                  También puedes saltarte este paso y completarlo desde el editor de perfil.
                 </p>
+              </div>
+            ),
+          },
+          {
+            id: "links",
+            title: "Links y caché (opcional)",
+            description:
+              "Añade tus redes y un caché orientativo para aparecer en más búsquedas. Puedes rellenarlo ahora o más tarde.",
+            content: (
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field
+                  id="spotifyUrl"
+                  label="Spotify"
+                  hint="https://open.spotify.com/artist/…"
+                  error={state?.fieldErrors?.spotifyUrl}
+                >
+                  <Input
+                    name="spotifyUrl"
+                    type="url"
+                    placeholder="https://open.spotify.com/artist/…"
+                    autoComplete="off"
+                  />
+                </Field>
+                <Field
+                  id="youtubeUrl"
+                  label="YouTube"
+                  hint="https://youtube.com/@tucanal"
+                  error={state?.fieldErrors?.youtubeUrl}
+                >
+                  <Input
+                    name="youtubeUrl"
+                    type="url"
+                    placeholder="https://youtube.com/@tucanal"
+                    autoComplete="off"
+                  />
+                </Field>
+                <Field
+                  id="instagramUrl"
+                  label="Instagram"
+                  hint="https://instagram.com/tunombre"
+                  error={state?.fieldErrors?.instagramUrl}
+                >
+                  <Input
+                    name="instagramUrl"
+                    type="url"
+                    placeholder="https://instagram.com/tunombre"
+                    autoComplete="off"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <p className="mb-4 text-sm text-paper-dim">
+                    Caché orientativo — ayuda a las promotoras a filtrar por presupuesto.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field
+                      id="cacheMin"
+                      label="Caché mínimo (€)"
+                      error={state?.fieldErrors?.cacheMin}
+                    >
+                      <Input
+                        name="cacheMin"
+                        type="number"
+                        min={0}
+                        step={50}
+                        placeholder="500"
+                      />
+                    </Field>
+                    <Field
+                      id="cacheMax"
+                      label="Caché máximo (€)"
+                      error={state?.fieldErrors?.cacheMax}
+                    >
+                      <Input
+                        name="cacheMax"
+                        type="number"
+                        min={0}
+                        step={50}
+                        placeholder="2000"
+                      />
+                    </Field>
+                  </div>
+                </div>
+                <input type="hidden" name="currency" value="EUR" />
+
+                <div className="sm:col-span-2 flex flex-col gap-4 border-t border-graphite-line pt-4">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      name="cachePublic"
+                      defaultChecked
+                      className="mt-0.5 h-4 w-4 accent-accent"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-paper">Mostrar caché al público</p>
+                      <p className="text-xs text-paper-dim">
+                        Si lo desactivas aparecerá «Caché no disponible» en tu perfil. El filtro de presupuesto para promotoras sigue funcionando.
+                      </p>
+                    </div>
+                  </label>
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      name="published"
+                      className="mt-0.5 h-4 w-4 accent-accent"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-paper">Publicar perfil al finalizar</p>
+                      <p className="text-xs text-paper-dim">
+                        Las promotoras podrán encontrarte en el buscador. También puedes activarlo después desde el dashboard.
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
             ),
           },

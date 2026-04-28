@@ -83,6 +83,7 @@ export default async function GenrePage({ params }: { params: Params }) {
                     genres: a.genres,
                     cacheMin: a.cacheMin,
                     cacheMax: a.cacheMax,
+                    cachePublic: a.cachePublic,
                     currency: a.currency,
                     completenessScore: a.completenessScore,
                     coverUrl: a.media[0]?.url ?? null,

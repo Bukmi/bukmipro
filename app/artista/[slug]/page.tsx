@@ -99,7 +99,12 @@ export default async function ArtistPublicPage({ params }: { params: Params }) {
                   <MapPin aria-hidden className="h-4 w-4" /> {artist.baseCity}
                 </span>
               )}
-              <span>Caché: {formatCacheRange(artist.cacheMin, artist.cacheMax, artist.currency)}</span>
+              <span>
+                Caché:{" "}
+                {artist.cachePublic === false
+                  ? "no disponible"
+                  : formatCacheRange(artist.cacheMin, artist.cacheMax, artist.currency)}
+              </span>
               <span>Radio: {artist.radiusKm ?? "—"} km</span>
               {avgRating !== null && (
                 <span className="flex items-center gap-1" aria-label={`Media ${avgRating} sobre 5`}>

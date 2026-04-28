@@ -1,9 +1,6 @@
 name: Accessibility (WCAG 2.1 AA)
 
 on:
-  # Run on every push to staging — after Vercel deploys the new version
-  push:
-    branches: [staging]
   # Run weekly so regressions from dep updates are caught
   schedule:
     - cron: "0 8 * * 1" # Mondays 08:00 UTC
@@ -41,20 +38,6 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
-      - name: Wait for staging deployment
-        # Give Vercel up to 3 minutes to finish deploying after the push
-        if: github.event_name == 'push'
-        run: |
-          echo "Waiting 90 s for Vercel to deploy..."
-          sleep 90
-          # Verify the deployment is up
-          for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.BASE_URL }})
-            echo "HTTP $STATUS from ${{ env.BASE_URL }}"
-            [ "$STATUS" = "200" ] && break
-            sleep 30
-          done
 
       - name: Run axe accessibility tests
         run: npx playwright test tests/a11y/

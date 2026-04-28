@@ -29,12 +29,30 @@ const howItWorks = [
 
 // Preguntas frecuentes — respuestas pendientes de redacción
 const faqs: { q: string; a: string }[] = [
-  { q: "¿Bukmi me garantiza conciertos?", a: "" },
-  { q: "¿Cómo funciona el matching con promotoras, agencias y festivales?", a: "" },
-  { q: "¿Puedo usar Bukmi si soy artista emergente o sin historial?", a: "" },
-  { q: "¿Qué pasa cuando una promotora quiere contratarme?", a: "" },
-  { q: "¿Cuánto cuesta y qué incluye el período de prueba?", a: "" },
-  { q: "¿Bukmi es una agencia de booking?", a: "" },
+  {
+    q: "¿Bukmi me garantiza conciertos?",
+    a: "No. Bukmi no es una agencia: es la herramienta que multiplica tus oportunidades. Te damos visibilidad ante promotoras, agencias y festivales, un perfil profesional generado con IA y un canal directo de contratación. El resto —tu propuesta artística— sigue siendo cosa tuya.",
+  },
+  {
+    q: "¿Cómo funciona el matching con promotoras, agencias y festivales?",
+    a: "Cuando creas tu perfil, la IA lo estructura con lo que de verdad importa para contratar: estilo, disponibilidad, caché orientativo, riders e historial. A partir de ahí, las promotoras te encuentran en búsquedas o reciben recomendaciones automáticas alineadas con su evento, y te envían propuestas concretas. Sin intermediarios.",
+  },
+  {
+    q: "¿Puedo usar Bukmi si soy artista emergente o sin historial?",
+    a: "Sí. Bukmi nace precisamente para artistas que no tienen mánager, booker ni mucho recorrido aún. La IA te ayuda a construir un perfil profesional en minutos a partir de lo que ya tienes, y cuanto antes empieces, antes lo haces crecer dentro de la plataforma.",
+  },
+  {
+    q: "¿Qué pasa cuando una promotora quiere contratarme?",
+    a: "Recibes la propuesta dentro de Bukmi, con todo sobre la mesa: fecha, sala y condiciones. Aceptas, negocias o declinas desde la propia plataforma. Y toda la documentación —rider, dosier, contrato, factura— queda guardada en un único sitio. Se acabó perseguir hilos entre WhatsApp, email y llamadas.",
+  },
+  {
+    q: "¿Cuánto cuesta y qué incluye el período de prueba?",
+    a: "Tienes 14 días gratis con acceso completo: perfil con IA, propuestas ilimitadas, calendario, almacenamiento y métricas. Después puedes seguir en el plan Artista (24,99 €/mes) o pasar a PRO (49,99 €/mes) si quieres máxima visibilidad y acceso prioritario a oportunidades. ¿Gestionas varios artistas? El plan Oficina aplica un 20 % de descuento.",
+  },
+  {
+    q: "¿Bukmi es una agencia de booking?",
+    a: "No. Bukmi es una plataforma: no firmamos en exclusiva, no representamos artistas y no nos llevamos comisión sobre tus conciertos. Conectamos directamente a artistas con promotoras y os damos las herramientas para que la contratación sea transparente, ágil y profesional.",
+  },
 ];
 
 const artistBenefits = [
@@ -150,21 +168,13 @@ export default async function LandingPage() {
             aria-labelledby="featured"
             className="container-hero flex flex-col gap-8 border-t border-graphite-line py-16"
           >
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-accent">
-                  Destacados
-                </p>
-                <h2 id="featured" className="mt-2 text-hero">
-                  Artistas con disponibilidad real
-                </h2>
-              </div>
-              <Link
-                href="/artistas"
-                className="text-sm font-bold text-paper underline underline-offset-4 hover:text-accent"
-              >
-                Ver todo el directorio →
-              </Link>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-accent">
+                Destacados
+              </p>
+              <h2 id="featured" className="mt-2 text-hero">
+                Artistas con disponibilidad real
+              </h2>
             </div>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((a) => (
@@ -178,6 +188,7 @@ export default async function LandingPage() {
                       genres: a.genres,
                       cacheMin: a.cacheMin,
                       cacheMax: a.cacheMax,
+                      cachePublic: a.cachePublic,
                       currency: a.currency,
                       completenessScore: a.completenessScore,
                       coverUrl: a.media[0]?.url ?? null,

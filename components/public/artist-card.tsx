@@ -10,6 +10,7 @@ type ArtistCardData = {
   genres: string[];
   cacheMin: number | null;
   cacheMax: number | null;
+  cachePublic?: boolean | null;
   currency: string;
   completenessScore: number;
   coverUrl?: string | null;
@@ -71,7 +72,9 @@ export function ArtistCard({
           )}
         </div>
         <p className="mt-auto text-xs font-semibold text-paper">
-          {formatCacheRange(artist.cacheMin, artist.cacheMax, artist.currency)}
+          {artist.cachePublic === false
+            ? "Caché no disponible"
+            : formatCacheRange(artist.cacheMin, artist.cacheMax, artist.currency)}
         </p>
       </div>
     </Link>
