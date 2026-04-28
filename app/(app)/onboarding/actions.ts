@@ -258,7 +258,7 @@ export async function completeOfficeOnboarding(
       error: `No encontramos artistas para: ${unknownSlugs.join(", ")}. El resto se ha añadido.`,
     };
   }
-  redirect("/dashboard/oficina");
+  redirect("/onboarding/bienvenida-promotora");
 }
 
 export async function completePromoterOnboarding(
@@ -326,5 +326,5 @@ export async function completePromoterOnboarding(
   await unstable_update({});
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  redirect("/onboarding/bienvenida-promotora");
 }
