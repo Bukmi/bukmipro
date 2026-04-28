@@ -21,7 +21,7 @@ export async function saveArtistProfile(
   const raw = {
     stageName: String(formData.get("stageName") ?? ""),
     category: String(formData.get("category") ?? "LIVE_MUSIC"),
-    formatType: String(formData.get("formatType") ?? "SOLO"),
+    formatType: String(formData.get("formatType") ?? "SOLISTA"),
     baseCity: String(formData.get("baseCity") ?? ""),
     radiusKm: String(formData.get("radiusKm") ?? "150"),
     bio: String(formData.get("bio") ?? ""),

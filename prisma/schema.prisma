@@ -19,9 +19,11 @@ enum UserRole {
 }
 
 enum FormatType {
-  SOLO
-  BAND
-  DJ
+  SOLISTA
+  DUO
+  TRIO
+  GRUPO
+  COMPANIA
 }
 
 enum CompanyType {
@@ -167,7 +169,7 @@ model ArtistProfile {
   slug               String     @unique
   bio                String?
   genres             String[]   @default([])
-  formatType         FormatType          @default(SOLO)
+  formatType         FormatType          @default(SOLISTA)
   category           PerformanceCategory @default(LIVE_MUSIC)
   baseCity           String?
   radiusKm           Int?       @default(150)

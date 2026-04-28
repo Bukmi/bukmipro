@@ -18,6 +18,14 @@ import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Dashboard" };
 
+const FORMAT_LABEL: Record<string, string> = {
+  SOLISTA: "Solista",
+  DUO: "Dúo",
+  TRIO: "Trío",
+  GRUPO: "Grupo (3-10 pax)",
+  COMPANIA: "Compañía (+10 pax)",
+};
+
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
@@ -210,7 +218,7 @@ export default async function DashboardPage() {
               <dt className="text-paper-mute">Ciudad</dt>
               <dd>{user.artistProfile.baseCity ?? "—"}</dd>
               <dt className="text-paper-mute">Formato</dt>
-              <dd>{user.artistProfile.formatType}</dd>
+              <dd>{FORMAT_LABEL[user.artistProfile.formatType] ?? user.artistProfile.formatType}</dd>
               <dt className="text-paper-mute">Caché</dt>
               <dd>{formatCacheRange(user.artistProfile.cacheMin, user.artistProfile.cacheMax, user.artistProfile.currency)}</dd>
               <dt className="text-paper-mute">Géneros</dt>

@@ -40,8 +40,16 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
+const FORMAT_LABEL: Record<string, string> = {
+  SOLISTA: "Solista",
+  DUO: "Dúo",
+  TRIO: "Trío",
+  GRUPO: "Grupo (3-10 pax)",
+  COMPANIA: "Compañía (+10 pax)",
+};
+
 function formatLabel(f: string) {
-  return f === "SOLO" ? "Solo / Cantautor" : f === "BAND" ? "Banda" : "DJ";
+  return FORMAT_LABEL[f] ?? f;
 }
 
 export default async function ArtistPublicPage({ params }: { params: Params }) {

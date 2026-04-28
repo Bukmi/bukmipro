@@ -11,7 +11,7 @@ const castingSchema = z.object({
   venueName: z.string().min(2, "Indica el nombre del venue"),
   venueCity: z.string().min(2, "Indica la ciudad"),
   eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida"),
-  formatType: z.enum(["SOLO", "BAND", "DJ", ""]).optional(),
+  formatType: z.enum(["SOLISTA", "DUO", "TRIO", "GRUPO", "COMPANIA", ""]).optional(),
   estimatedCache: z.coerce.number().int().min(0).optional().nullable(),
   description: z.string().optional(),
   applyDeadlineDays: z.coerce.number().int().min(1).max(30).default(3),

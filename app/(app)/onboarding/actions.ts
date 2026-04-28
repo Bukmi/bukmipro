@@ -37,7 +37,7 @@ export async function skipOnboarding() {
       userId: user.id,
       stageName: emailLocal,
       slug,
-      formatType: "SOLO",
+      formatType: "SOLISTA",
       category: "LIVE_MUSIC",
       completenessScore: 0,
       published: false,
@@ -75,7 +75,7 @@ export async function completeArtistOnboarding(
   const raw = {
     stageName: String(formData.get("stageName") ?? "").trim(),
     category: String(formData.get("category") ?? "LIVE_MUSIC"),
-    formatType: String(formData.get("formatType") ?? "SOLO"),
+    formatType: String(formData.get("formatType") ?? "SOLISTA"),
     baseCity: String(formData.get("baseCity") ?? "").trim(),
     genres: formData.getAll("genres").map(String).filter(Boolean),
     bio: String(formData.get("bio") ?? ""),

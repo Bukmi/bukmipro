@@ -106,9 +106,11 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
             className="h-11 rounded-xl border border-graphite-line bg-graphite-soft px-4 text-paper focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-graphite"
           >
             <option value="">Cualquiera</option>
-            <option value="SOLO">Solo / Cantautor</option>
-            <option value="BAND">Banda</option>
-            <option value="DJ">DJ</option>
+            <option value="SOLISTA">Solista</option>
+            <option value="DUO">Dúo</option>
+            <option value="TRIO">Trío</option>
+            <option value="GRUPO">Grupo (3-10 pax)</option>
+            <option value="COMPANIA">Compañía (+10 pax)</option>
           </select>
         </Field>
         <Field id="maxCache" label="Caché máx. (€)">
@@ -161,7 +163,7 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                   </div>
                   <div className="flex flex-1 flex-col gap-2 p-4">
                     <p className="text-xs uppercase tracking-[0.15em] text-accent">
-                      {a.formatType === "SOLO" ? "Solo" : a.formatType === "BAND" ? "Banda" : "DJ"}
+                      {{ SOLISTA: "Solista", DUO: "Dúo", TRIO: "Trío", GRUPO: "Grupo (3-10 pax)", COMPANIA: "Compañía (+10 pax)" }[a.formatType] ?? a.formatType}
                     </p>
                     <h2 className="text-lg font-extrabold">{a.stageName}</h2>
                     <div className="flex flex-wrap gap-3 text-xs text-paper-dim">
