@@ -6,6 +6,7 @@ import { auth, unstable_update } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { computeCompleteness } from "@/lib/artist";
+import { canPublishProfile, planStatus } from "@/lib/plan";
 import {
   artistOnboardingSchema,
   officeOnboardingSchema,
@@ -94,6 +95,17 @@ export async function completeArtistOnboarding(
     const fieldErrors: Record<string, string> = {};
     for (const i of parsed.error.issues) fieldErrors[i.path.join(".")] = i.message;
     return { error: "Revisa los campos.", fieldErrors };
+  }
+
+  // Plan gate: silently downgrade published to false if plan not active
+  if (parsed.data.published) {
+    const userPlan = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { planCode: true, subscriptionStatus: true, trialEndsAt: true },
+    });
+    if (!userPlan || !canPublishProfile(planStatus(userPlan))) {
+      parsed.data.published = false;
+    }
   }
 
   const baseSlug = slugify(parsed.data.stageName);

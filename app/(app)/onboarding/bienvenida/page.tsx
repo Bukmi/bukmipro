@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { CheckCircle2, Image as ImageIcon, Calendar, Eye, Rocket } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { canPublishProfile, planStatus } from "@/lib/plan";
 import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "¡Bienvenido a Bukmi!" };
@@ -12,6 +13,15 @@ async function publishProfile() {
   "use server";
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { planCode: true, subscriptionStatus: true, trialEndsAt: true },
+  });
+  if (!user || !canPublishProfile(planStatus(user))) {
+    redirect("/dashboard/facturacion");
+  }
+
   await prisma.artistProfile.update({
     where: { userId: session.user.id },
     data: { published: true },
@@ -68,7 +78,7 @@ export default async function BienvenidaPage() {
       done: artist._count.availability > 0,
     },
     {
-      href: `/artistas/${artist.slug}`,
+      href: `/artista/${artist.slug}`,
       Icon: Eye,
       title: "Ve cómo te ven",
       description: "Revisa tu perfil público antes de publicarlo.",
