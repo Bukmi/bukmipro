@@ -17,7 +17,7 @@ const howItWorks = [
   },
   {
     label: "Lo que no hacemos",
-    tone: "text-paper-mute",
+    tone: "text-accent",
     text: "No somos tu agencia ni te garantizamos conciertos. La negociación final, el caché y el contrato los cierras tú con cada promotora.",
   },
   {
