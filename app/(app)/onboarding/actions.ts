@@ -17,6 +17,42 @@ export type OnboardingState = {
   fieldErrors?: Record<string, string>;
 };
 
+export async function skipOnboarding() {
+  const user = await requireUser();
+  if (user.role !== "ARTIST") redirect("/dashboard");
+
+  // Derive a starter slug from the email local part
+  const emailLocal = user.email?.split("@")[0] ?? "artista";
+  const baseSlug = slugify(emailLocal);
+  let slug = baseSlug;
+  let n = 1;
+  while (await prisma.artistProfile.findUnique({ where: { slug }, select: { id: true } })) {
+    slug = `${baseSlug}-${++n}`;
+  }
+
+  // Create a minimal profile (not published, score 0) only if none exists yet
+  await prisma.artistProfile.upsert({
+    where: { userId: user.id },
+    create: {
+      userId: user.id,
+      stageName: emailLocal,
+      slug,
+      formatType: "SOLO",
+      completenessScore: 0,
+      published: false,
+    },
+    update: {}, // don't overwrite an existing in-progress profile
+  });
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { onboardingStatus: "COMPLETED" },
+  });
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
+}
+
 async function requireUser() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");

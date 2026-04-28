@@ -84,7 +84,34 @@ export default async function DashboardPage() {
         </p>
       </header>
 
-      {user.artistProfile && !user.artistProfile.published && (
+      {/* Nivel 1 — perfil vacío (saltó el onboarding) */}
+      {user.artistProfile && user.artistProfile.completenessScore === 0 && (
+        <aside
+          aria-label="Perfil vacío"
+          className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-accent bg-accent/10 px-5 py-5"
+        >
+          <div className="flex items-center gap-3">
+            <span aria-hidden className="text-2xl">👋</span>
+            <div>
+              <p className="font-semibold text-paper">
+                Tu perfil está vacío — las promotoras no pueden encontrarte
+              </p>
+              <p className="text-xs text-paper-dim mt-0.5">
+                Tarda menos de 3 minutos. Añade nombre artístico, géneros y una foto para aparecer en el buscador.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/perfil"
+            className="shrink-0 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-graphite hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite"
+          >
+            Completar perfil →
+          </Link>
+        </aside>
+      )}
+
+      {/* Nivel 2 — perfil con datos pero sin publicar */}
+      {user.artistProfile && user.artistProfile.completenessScore > 0 && !user.artistProfile.published && (
         <aside
           aria-label="Perfil sin publicar"
           className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/40 bg-accent/10 px-5 py-4"
@@ -96,7 +123,7 @@ export default async function DashboardPage() {
                 Tu perfil no está publicado — las promotoras no pueden verte
               </p>
               <p className="text-xs text-paper-dim">
-                Publícalo desde el editor de perfil cuando estés listo.
+                Publícalo cuando estés listo. Solo tú lo ves ahora mismo.
               </p>
             </div>
           </div>
@@ -109,6 +136,7 @@ export default async function DashboardPage() {
         </aside>
       )}
 
+      {/* Nivel 3 — publicado pero incompleto */}
       {user.artistProfile && user.artistProfile.published && user.artistProfile.completenessScore < 70 && (
         <aside
           aria-label="Mejora tu perfil"
