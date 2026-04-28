@@ -46,8 +46,13 @@ const urlOrEmptyOnboarding = z
     message: "Debe empezar por http(s)://",
   });
 
+export const performanceCategoryEnum = z.enum([
+  "LIVE_MUSIC", "DJ", "COMEDY", "MAGIC", "ACTING", "DANCE_ACROBATICS", "KIDS",
+]);
+
 export const artistOnboardingSchema = z.object({
   stageName: z.string().min(2).max(80),
+  category: performanceCategoryEnum.default("LIVE_MUSIC"),
   formatType: z.enum(["SOLO", "BAND", "DJ"]),
   baseCity: z.string().min(2).max(80),
   genres: z.array(z.string()).min(1, { message: "Elige al menos un género" }).max(5),
@@ -77,6 +82,7 @@ const urlOrEmpty = z
 
 export const artistProfileSchema = z.object({
   stageName: z.string().min(2).max(80),
+  category: performanceCategoryEnum.optional().default("LIVE_MUSIC"),
   formatType: z.enum(["SOLO", "BAND", "DJ"]),
   baseCity: z.string().min(2).max(80),
   radiusKm: z.coerce.number().int().min(0).max(5000).default(150),
