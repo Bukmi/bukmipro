@@ -73,7 +73,7 @@ const plans: Plan[] = [
     name: "Oficina",
     price: "−20%",
     period: "sobre el plan PRO",
-    description: "Para mánagers y oficinas de booking que gestionan varios artistas. Paga 39,99 € / artista / mes en lugar de 49,99 €.",
+    description: "Para mánagers y oficinas de booking que gestionan varios artistas.",
     cta: "Hablar con el equipo",
     ctaHref: "mailto:hola@bukmi.pro?subject=Plan%20Oficina",
     highlight: false,
@@ -127,16 +127,19 @@ export default function PreciosPage() {
                     : "bg-graphite-soft ring-graphite-line"
                 }`}
               >
-                {plan.highlight && (
-                  <p className="mb-4 inline-flex w-fit rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-graphite">
-                    Más popular
-                  </p>
-                )}
+                {/* Badge — invisible en cards sin highlight para mantener alineación */}
+                <p className={`mb-4 inline-flex w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${
+                  plan.highlight
+                    ? "bg-accent text-graphite"
+                    : "invisible select-none"
+                }`}>
+                  Más popular
+                </p>
                 <h3 className={`text-xl font-extrabold ${plan.highlight ? "text-graphite" : "text-paper"}`}>
                   {plan.name}
                 </h3>
                 <div className="mt-4 flex items-end gap-1">
-                  <span className={`font-extrabold ${plan.id === "oficina" ? "text-5xl text-accent" : "text-4xl tabular-nums"} ${plan.highlight ? "text-graphite" : plan.id === "oficina" ? "" : "text-paper"}`}>
+                  <span className={`text-4xl font-extrabold tabular-nums ${plan.highlight ? "text-graphite" : "text-paper"}`}>
                     {plan.price}
                   </span>
                   <span className={`mb-1 text-sm ${plan.highlight ? "text-graphite/60" : "text-paper-dim"}`}>
@@ -180,11 +183,10 @@ export default function PreciosPage() {
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-accent">Para promotoras</p>
               <h2 id="promotoras-gratis" className="mt-3 text-hero">
-                Gratis durante el lanzamiento
+                Gratis, siempre
               </h2>
               <p className="mt-4 text-paper-dim">
-                Buscador, propuestas, castings y gestión de riders sin coste mientras estamos en beta.
-                Habrá un plan de pago cuando el producto esté maduro — te avisaremos con tiempo.
+                Buscador, propuestas, castings y gestión de riders sin coste para promotoras.
               </p>
               <Button asChild className="mt-8">
                 <Link href="/signup?role=PROMOTER">Crear cuenta de promotora</Link>
