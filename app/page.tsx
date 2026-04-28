@@ -4,8 +4,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { ArtistCard } from "@/components/public/artist-card";
-import { PERFORMANCE_CATEGORIES, categoryFromSlug } from "@/lib/categories";
+import { FeaturedSection } from "@/components/landing/featured-section";
 
 export const revalidate = 600;
 
@@ -69,28 +68,18 @@ const promoterBenefits = [
   "Contratos, riders y pagos centralizados",
 ];
 
-export default async function LandingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ cat?: string }>;
-}) {
-  const { cat } = await searchParams;
-  const activeCategory = cat ? categoryFromSlug(cat) : null;
-
+export default async function LandingPage() {
   const [artistCount, promoterCount, bookedCount, featured] = await Promise.all([
     prisma.artistProfile.count(),
     prisma.promoterProfile.count(),
     prisma.bookingRequest.count({ where: { status: "BOOKED" } }),
     prisma.artistProfile.findMany({
-      where: {
-        published: true,
-        ...(activeCategory ? { category: activeCategory } : {}),
-      },
+      where: { published: true },
       include: {
         media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } },
       },
       orderBy: [{ completenessScore: "desc" }, { updatedAt: "desc" }],
-      take: 6,
+      take: 42,
     }),
   ]);
 
@@ -185,76 +174,23 @@ export default async function LandingPage({
               Artistas con disponibilidad real
             </h2>
           </div>
-
-          {/* Tabs de categoría */}
-          <nav aria-label="Categorías" className="-mb-2 flex flex-wrap gap-2">
-            <Link
-              href="/"
-              className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
-                !activeCategory
-                  ? "border-accent bg-accent text-accent-ink"
-                  : "border-graphite-line text-paper-dim hover:border-accent hover:text-accent"
-              }`}
-            >
-              Todos
-            </Link>
-            {PERFORMANCE_CATEGORIES.map((c) => (
-              <Link
-                key={c.value}
-                href={`/?cat=${c.slug}`}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
-                  activeCategory === c.value
-                    ? "border-accent bg-accent text-accent-ink"
-                    : "border-graphite-line text-paper-dim hover:border-accent hover:text-accent"
-                }`}
-              >
-                <span aria-hidden>{c.emoji}</span>
-                {c.label}
-              </Link>
-            ))}
-          </nav>
-
-          {featured.length > 0 ? (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.map((a) => (
-                <li key={a.id}>
-                  <ArtistCard
-                    artist={{
-                      slug: a.slug,
-                      stageName: a.stageName,
-                      formatType: a.formatType,
-                      baseCity: a.baseCity,
-                      genres: a.genres,
-                      cacheMin: a.cacheMin,
-                      cacheMax: a.cacheMax,
-                      cachePublic: a.cachePublic,
-                      currency: a.currency,
-                      completenessScore: a.completenessScore,
-                      coverUrl: a.media[0]?.url ?? null,
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="py-8 text-center text-paper-mute">
-              Aún no hay artistas en esta categoría. ¡Sé el primero!
-            </p>
-          )}
-
-          {/* Categorías como pills de navegación */}
-          <nav aria-label="Explorar por categoría" className="flex flex-wrap gap-2 border-t border-graphite-line pt-6">
-            {PERFORMANCE_CATEGORIES.map((c) => (
-              <Link
-                key={c.value}
-                href={`/?cat=${c.slug}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-graphite-line px-3 py-1 text-sm text-paper-dim hover:border-accent hover:text-accent transition-colors"
-              >
-                <span aria-hidden>{c.emoji}</span>
-                {c.label}
-              </Link>
-            ))}
-          </nav>
+          <FeaturedSection
+            artists={featured.map((a) => ({
+              id: a.id,
+              slug: a.slug,
+              stageName: a.stageName,
+              formatType: a.formatType,
+              category: a.category,
+              baseCity: a.baseCity,
+              genres: a.genres,
+              cacheMin: a.cacheMin,
+              cacheMax: a.cacheMax,
+              cachePublic: a.cachePublic,
+              currency: a.currency,
+              completenessScore: a.completenessScore,
+              coverUrl: a.media[0]?.url ?? null,
+            }))}
+          />
         </section>
 
         <section
