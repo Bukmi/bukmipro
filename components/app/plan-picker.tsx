@@ -18,23 +18,23 @@ const PLANS: Plan[] = [
   {
     code: "ARTIST",
     name: "Artista",
-    price: "9 €/mes",
-    description: "Perfil publicado, 5 riders, analíticas propias.",
-    features: ["Perfil público", "Riders y media ilimitados", "Inbox de propuestas"],
+    price: "24,99 €/mes",
+    description: "Perfil publicado en el directorio y acceso al inbox de propuestas.",
+    features: ["Perfil público en el buscador", "Media y riders ilimitados", "Inbox de propuestas", "Analíticas propias"],
   },
   {
     code: "PRO",
     name: "Pro",
-    price: "29 €/mes",
-    description: "Para promotoras y salas que envían propuestas regularmente.",
-    features: ["Propuestas ilimitadas", "Hasta 5 venues", "Export CSV"],
+    price: "49,99 €/mes",
+    description: "Todo lo del plan Artista más herramientas avanzadas de gestión.",
+    features: ["Todo el plan Artista", "Prioridad en búsquedas", "Export CSV", "Soporte prioritario"],
   },
   {
     code: "OFFICE",
     name: "Office",
-    price: "79 €/mes",
-    description: "Oficinas y managers que representan varios artistas.",
-    features: ["Roster multi-artista", "Analíticas agregadas", "Soporte prioritario"],
+    price: "19,99 €/mes",
+    description: "Para managers y oficinas. Gestiona varios artistas desde un perfil. −20% vs plan Artista.",
+    features: ["Roster multi-artista", "Analíticas agregadas", "Un perfil, varios artistas"],
   },
 ];
 

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireArtist } from "@/lib/session";
 import { artistProfileSchema } from "@/lib/validation";
 import { computeCompleteness } from "@/lib/artist";
+import { canPublishProfile, planStatus } from "@/lib/plan";
 
 export type SaveArtistState = {
   ok?: boolean;
@@ -16,7 +17,7 @@ export async function saveArtistProfile(
   _prev: SaveArtistState,
   formData: FormData
 ): Promise<SaveArtistState> {
-  const { artist } = await requireArtist();
+  const { session, artist } = await requireArtist();
 
   const raw = {
     stageName: String(formData.get("stageName") ?? ""),
@@ -42,6 +43,21 @@ export async function saveArtistProfile(
     const fieldErrors: Record<string, string> = {};
     for (const i of parsed.error.issues) fieldErrors[i.path.join(".")] = i.message;
     return { error: "Revisa los campos marcados.", fieldErrors };
+  }
+
+  // Plan gate: solo se puede publicar con plan activo
+  if (parsed.data.published) {
+    const userPlan = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { planCode: true, subscriptionStatus: true, trialEndsAt: true },
+    });
+    if (!userPlan || !canPublishProfile(planStatus(userPlan))) {
+      return {
+        error:
+          "Necesitas un plan activo para publicar tu perfil. Activa tu cuenta desde Facturación.",
+        fieldErrors: { published: "Plan requerido para publicar" },
+      };
+    }
   }
 
   const [mediaCount, ridersCount] = await Promise.all([
