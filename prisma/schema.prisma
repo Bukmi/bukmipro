@@ -85,6 +85,16 @@ enum MessageSender {
   SYSTEM
 }
 
+enum PerformanceCategory {
+  LIVE_MUSIC
+  DJ
+  COMEDY
+  MAGIC
+  ACTING
+  DANCE_ACROBATICS
+  KIDS
+}
+
 enum CastingStatus {
   OPEN
   CLOSED
@@ -157,7 +167,8 @@ model ArtistProfile {
   slug               String     @unique
   bio                String?
   genres             String[]   @default([])
-  formatType         FormatType @default(SOLO)
+  formatType         FormatType          @default(SOLO)
+  category           PerformanceCategory @default(LIVE_MUSIC)
   baseCity           String?
   radiusKm           Int?       @default(150)
   cacheMin           Int?
@@ -176,6 +187,7 @@ model ArtistProfile {
 
   @@index([published, completenessScore])
   @@index([published, formatType, completenessScore])
+  @@index([published, category, completenessScore])
   @@index([published, baseCity])
 
   media                Media[]

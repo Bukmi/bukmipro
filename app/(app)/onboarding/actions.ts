@@ -70,6 +70,7 @@ export async function completeArtistOnboarding(
 
   const raw = {
     stageName: String(formData.get("stageName") ?? "").trim(),
+    category: String(formData.get("category") ?? "LIVE_MUSIC"),
     formatType: String(formData.get("formatType") ?? "SOLO"),
     baseCity: String(formData.get("baseCity") ?? "").trim(),
     genres: formData.getAll("genres").map(String).filter(Boolean),
@@ -118,6 +119,7 @@ export async function completeArtistOnboarding(
       userId: user.id,
       stageName: parsed.data.stageName,
       slug,
+      category: parsed.data.category,
       formatType: parsed.data.formatType,
       baseCity: parsed.data.baseCity,
       genres: parsed.data.genres,
@@ -134,6 +136,7 @@ export async function completeArtistOnboarding(
     },
     update: {
       stageName: parsed.data.stageName,
+      category: parsed.data.category,
       formatType: parsed.data.formatType,
       baseCity: parsed.data.baseCity,
       genres: parsed.data.genres,

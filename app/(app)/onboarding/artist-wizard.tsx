@@ -6,6 +6,7 @@ import { Field } from "@/components/ui/field";
 import { Stepper } from "@/components/onboarding/stepper";
 import { GenrePicker } from "@/components/onboarding/genre-picker";
 import { GENRES } from "./genres";
+import { PERFORMANCE_CATEGORIES } from "@/lib/categories";
 import { completeArtistOnboarding, type OnboardingState } from "./actions";
 
 const BIO_MIN = 80;
@@ -17,6 +18,7 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
     {}
   );
   const [bioLen, setBioLen] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState("LIVE_MUSIC");
 
   return (
     <form action={formAction} noValidate>
@@ -24,6 +26,31 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
         pending={pending}
         submitLabel="Completar onboarding"
         steps={[
+          {
+            id: "category",
+            title: "¿Qué tipo de artista eres?",
+            description: "Esto ayuda a las promotoras a encontrarte en el buscador.",
+            content: (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                <input type="hidden" name="category" value={selectedCategory} />
+                {PERFORMANCE_CATEGORIES.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setSelectedCategory(c.value)}
+                    className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-graphite ${
+                      selectedCategory === c.value
+                        ? "border-accent bg-accent/10 text-paper"
+                        : "border-graphite-line bg-graphite-soft text-paper-dim hover:border-accent/50 hover:text-paper"
+                    }`}
+                  >
+                    <span className="text-3xl" aria-hidden>{c.emoji}</span>
+                    <span>{c.label}</span>
+                  </button>
+                ))}
+              </div>
+            ),
+          },
           {
             id: "basics",
             title: "Datos básicos",
