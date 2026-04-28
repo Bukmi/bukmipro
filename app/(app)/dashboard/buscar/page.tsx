@@ -27,7 +27,8 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
 
   const artists = await prisma.artistProfile.findMany({
     where: {
-      published: true,
+      // Las promotoras ven todos los artistas registrados, publicados o no.
+      // El flag "published" solo controla la visibilidad en el directorio público.
       ...(filters.formatType ? { formatType: filters.formatType } : {}),
       ...(filters.city
         ? { baseCity: { contains: filters.city, mode: "insensitive" as const } }
@@ -64,7 +65,7 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
     <section className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
         <p className="text-xs uppercase tracking-[0.2em] text-accent">Buscador</p>
-        <h1 className="text-hero">Artistas disponibles</h1>
+        <h1 className="text-hero">Buscar artistas</h1>
         <p className="text-paper-dim">
           {artists.length} {artists.length === 1 ? "artista" : "artistas"} coinciden
           con tus filtros. Ordenados por completitud del perfil.

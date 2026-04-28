@@ -107,15 +107,28 @@ export function ProfileForm({ profile }: { profile: ArtistProfile }) {
 
       <section aria-labelledby="cache" className="grid gap-5 sm:grid-cols-3">
         <h2 id="cache" className="sm:col-span-3 text-base font-extrabold">Caché orientativo</h2>
-        <Field id="cacheMin" label="Mínimo" error={state?.fieldErrors?.cacheMin} hint="Solo promotoras lo ven.">
+        <Field id="cacheMin" label="Mínimo (€)" error={state?.fieldErrors?.cacheMin}>
           <Input name="cacheMin" type="number" min={0} defaultValue={profile.cacheMin ?? ""} />
         </Field>
-        <Field id="cacheMax" label="Máximo" error={state?.fieldErrors?.cacheMax}>
+        <Field id="cacheMax" label="Máximo (€)" error={state?.fieldErrors?.cacheMax}>
           <Input name="cacheMax" type="number" min={0} defaultValue={profile.cacheMax ?? ""} />
         </Field>
         <Field id="currency" label="Divisa" error={state?.fieldErrors?.currency}>
           <Input name="currency" defaultValue={profile.currency} maxLength={3} />
         </Field>
+        <div className="sm:col-span-3">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              name="cachePublic"
+              defaultChecked={profile.cachePublic ?? true}
+              className="mt-1 h-4 w-4 rounded border-graphite-line bg-graphite-soft accent-accent"
+            />
+            <span className="text-sm text-paper-dim">
+              <strong className="text-paper">Mostrar caché a promotoras</strong> — si lo desactivas, aparecerá «Caché no disponible» en tu perfil. El filtro de presupuesto sigue funcionando internamente.
+            </span>
+          </label>
+        </div>
       </section>
 
       <section aria-labelledby="redes" className="grid gap-5 sm:grid-cols-2">
@@ -135,8 +148,8 @@ export function ProfileForm({ profile }: { profile: ArtistProfile }) {
       </section>
 
       <section aria-labelledby="visibilidad" className="rounded-2xl bg-graphite-soft p-5 ring-1 ring-graphite-line">
-        <h2 id="visibilidad" className="text-base font-extrabold">Visibilidad</h2>
-        <label className="mt-3 flex items-start gap-3">
+        <h2 id="visibilidad" className="text-base font-extrabold">Visibilidad pública</h2>
+        <label className="mt-3 flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
             name="published"
@@ -144,8 +157,8 @@ export function ProfileForm({ profile }: { profile: ArtistProfile }) {
             className="mt-1 h-4 w-4 rounded border-graphite-line bg-graphite-soft accent-accent"
           />
           <span className="text-sm text-paper-dim">
-            <strong className="text-paper">Publicar perfil</strong> — aparecerá en el
-            buscador de promotoras. Puedes desactivar en cualquier momento.
+            <strong className="text-paper">Aparecer en el directorio público</strong> — tu perfil será visible en bukmi.pro para cualquier visitante sin cuenta.{" "}
+            Las promotoras registradas pueden encontrarte siempre, independientemente de esta opción.
           </span>
         </label>
       </section>
