@@ -4,8 +4,8 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { ArtistCard } from "@/components/public/artist-card";
-import { GENRE_SLUGS } from "@/lib/genres";
+import { FeaturedSection } from "@/components/landing/featured-section";
+import { MetricsSection } from "@/components/landing/metrics-section";
 
 export const revalidate = 600;
 
@@ -17,7 +17,7 @@ const howItWorks = [
   },
   {
     label: "Lo que no hacemos",
-    tone: "text-paper-mute",
+    tone: "text-accent",
     text: "No somos tu agencia ni te garantizamos conciertos. La negociación final, el caché y el contrato los cierras tú con cada promotora.",
   },
   {
@@ -70,17 +70,21 @@ const promoterBenefits = [
 ];
 
 export default async function LandingPage() {
-  const [artistCount, promoterCount, bookedCount, featured] = await Promise.all([
+  const [artistCount, promoterCount, bookedCount, budgetAgg, featured] = await Promise.all([
     prisma.artistProfile.count(),
     prisma.promoterProfile.count(),
     prisma.bookingRequest.count({ where: { status: "BOOKED" } }),
+    prisma.bookingRequest.aggregate({
+      where: { status: "BOOKED" },
+      _sum: { budgetMax: true },
+    }),
     prisma.artistProfile.findMany({
-    where: { published: true },
-    include: {
-      media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } },
-    },
+      where: { published: true },
+      include: {
+        media: { where: { kind: "PHOTO" }, take: 1, orderBy: { sortOrder: "asc" } },
+      },
       orderBy: [{ completenessScore: "desc" }, { updatedAt: "desc" }],
-      take: 6,
+      take: 42,
     }),
   ]);
 
@@ -120,28 +124,30 @@ export default async function LandingPage() {
         </section>
 
         {/* ── Métricas ─────────────────────────────────────────────── */}
-        <section
-          aria-labelledby="metrics"
-          className="container-hero border-t border-graphite-line py-16"
-        >
-          <h2 id="metrics" className="sr-only">Bukmi en números</h2>
-          <dl className="grid grid-cols-3 gap-8 text-center">
-            {[
-              { value: artistCount,  label: "Artistas" },
-              { value: promoterCount, label: "Promotoras" },
-              { value: bookedCount,  label: "Shows cerrados" },
-            ].map(({ value, label }) => (
-              <div key={label} className="flex flex-col gap-2">
-                <dt className="text-xs uppercase tracking-[0.2em] text-paper-mute order-last">
-                  {label}
-                </dt>
-                <dd className="text-5xl font-extrabold tabular-nums text-accent sm:text-6xl">
-                  {value.toLocaleString("es-ES")}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
+        <MetricsSection
+          metrics={[
+            {
+              raw: artistCount,
+              label: "Artistas verificados",
+              sublabel: "Solos, bandas y DJ activos",
+            },
+            {
+              raw: promoterCount,
+              label: "Promotoras",
+              sublabel: "Salas, festivales y agencias",
+            },
+            {
+              raw: bookedCount,
+              label: "Shows cerrados",
+              sublabel: "Vía Bukmi, últimos 90 días",
+            },
+            {
+              raw: budgetAgg._sum.budgetMax ?? 0,
+              label: "€ generados",
+              sublabel: "Cachés cerrados vía Bukmi",
+            },
+          ]}
+        />
 
         {/* ── Cómo funciona ───────────────────────────────────────── */}
         <section
@@ -163,53 +169,36 @@ export default async function LandingPage() {
           </dl>
         </section>
 
-        {featured.length > 0 && (
-          <section
-            aria-labelledby="featured"
-            className="container-hero flex flex-col gap-8 border-t border-graphite-line py-16"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-accent">
-                Destacados
-              </p>
-              <h2 id="featured" className="mt-2 text-hero">
-                Artistas con disponibilidad real
-              </h2>
-            </div>
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.map((a) => (
-                <li key={a.id}>
-                  <ArtistCard
-                    artist={{
-                      slug: a.slug,
-                      stageName: a.stageName,
-                      formatType: a.formatType,
-                      baseCity: a.baseCity,
-                      genres: a.genres,
-                      cacheMin: a.cacheMin,
-                      cacheMax: a.cacheMax,
-                      cachePublic: a.cachePublic,
-                      currency: a.currency,
-                      completenessScore: a.completenessScore,
-                      coverUrl: a.media[0]?.url ?? null,
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
-            <nav aria-label="Géneros" className="flex flex-wrap gap-2">
-              {GENRE_SLUGS.slice(0, 8).map(({ name, slug }) => (
-                <Link
-                  key={slug}
-                  href={`/generos/${slug}`}
-                  className="inline-flex items-center rounded-full border border-graphite-line px-3 py-1 text-sm text-paper-dim hover:border-accent hover:text-accent"
-                >
-                  {name}
-                </Link>
-              ))}
-            </nav>
-          </section>
-        )}
+        <section
+          aria-labelledby="featured"
+          className="container-hero flex flex-col gap-8 border-t border-graphite-line py-16"
+        >
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-accent">
+              Destacados
+            </p>
+            <h2 id="featured" className="mt-2 text-hero">
+              Artistas con disponibilidad real
+            </h2>
+          </div>
+          <FeaturedSection
+            artists={featured.map((a) => ({
+              id: a.id,
+              slug: a.slug,
+              stageName: a.stageName,
+              formatType: a.formatType,
+              category: a.category,
+              baseCity: a.baseCity,
+              genres: a.genres,
+              cacheMin: a.cacheMin,
+              cacheMax: a.cacheMax,
+              cachePublic: a.cachePublic,
+              currency: a.currency,
+              completenessScore: a.completenessScore,
+              coverUrl: a.media[0]?.url ?? null,
+            }))}
+          />
+        </section>
 
         <section
           aria-labelledby="segments"
