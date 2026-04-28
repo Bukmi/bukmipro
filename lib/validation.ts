@@ -57,7 +57,9 @@ export const artistOnboardingSchema = z.object({
   instagramUrl: urlOrEmptyOnboarding,
   cacheMin: z.coerce.number().int().min(0).max(500000).optional().nullable(),
   cacheMax: z.coerce.number().int().min(0).max(500000).optional().nullable(),
+  cachePublic: z.boolean().default(true),
   currency: z.string().length(3).default("EUR"),
+  published: z.boolean().default(false),
 }).refine(
   (d) => !(d.cacheMin && d.cacheMax) || d.cacheMin <= d.cacheMax,
   { message: "El caché mínimo no puede superar el máximo", path: ["cacheMin"] }

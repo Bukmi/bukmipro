@@ -43,7 +43,9 @@ export async function completeArtistOnboarding(
     instagramUrl: String(formData.get("instagramUrl") ?? ""),
     cacheMin: String(formData.get("cacheMin") ?? "") || null,
     cacheMax: String(formData.get("cacheMax") ?? "") || null,
+    cachePublic: formData.get("cachePublic") !== null,
     currency: String(formData.get("currency") ?? "EUR"),
+    published: formData.get("published") !== null,
   };
 
   const parsed = artistOnboardingSchema.safeParse(raw);
@@ -89,7 +91,9 @@ export async function completeArtistOnboarding(
       instagramUrl: parsed.data.instagramUrl ?? null,
       cacheMin: parsed.data.cacheMin ?? null,
       cacheMax: parsed.data.cacheMax ?? null,
+      cachePublic: parsed.data.cachePublic,
       currency: parsed.data.currency,
+      published: parsed.data.published,
       completenessScore,
     },
     update: {
@@ -103,7 +107,9 @@ export async function completeArtistOnboarding(
       instagramUrl: parsed.data.instagramUrl ?? null,
       cacheMin: parsed.data.cacheMin ?? null,
       cacheMax: parsed.data.cacheMax ?? null,
+      cachePublic: parsed.data.cachePublic,
       currency: parsed.data.currency,
+      published: parsed.data.published,
       completenessScore,
     },
   });

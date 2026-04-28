@@ -195,6 +195,36 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
                   </div>
                 </div>
                 <input type="hidden" name="currency" value="EUR" />
+
+                <div className="sm:col-span-2 flex flex-col gap-4 border-t border-graphite-line pt-4">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      name="cachePublic"
+                      defaultChecked
+                      className="mt-0.5 h-4 w-4 accent-accent"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-paper">Mostrar caché al público</p>
+                      <p className="text-xs text-paper-dim">
+                        Si lo desactivas aparecerá «Caché no disponible» en tu perfil. El filtro de presupuesto para promotoras sigue funcionando.
+                      </p>
+                    </div>
+                  </label>
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      name="published"
+                      className="mt-0.5 h-4 w-4 accent-accent"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-paper">Publicar perfil al finalizar</p>
+                      <p className="text-xs text-paper-dim">
+                        Las promotoras podrán encontrarte en el buscador. También puedes activarlo después desde el dashboard.
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
             ),
           },

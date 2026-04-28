@@ -7,7 +7,6 @@ const SITE_URL = process.env.APP_URL ?? "https://bukmi.pro";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${SITE_URL}/artistas`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
     { url: `${SITE_URL}/precios`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/signup`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/login`, changeFrequency: "monthly", priority: 0.3 },

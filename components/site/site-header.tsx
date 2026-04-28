@@ -17,12 +17,6 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="Principal" className="flex items-center gap-1 sm:gap-2">
           <Link
-            href="/artistas"
-            className="hidden rounded-xl px-3 py-2 text-sm text-paper-dim hover:text-paper sm:inline-flex"
-          >
-            Artistas
-          </Link>
-          <Link
             href="/precios"
             className="hidden rounded-xl px-3 py-2 text-sm text-paper-dim hover:text-paper sm:inline-flex"
           >

@@ -168,21 +168,13 @@ export default async function LandingPage() {
             aria-labelledby="featured"
             className="container-hero flex flex-col gap-8 border-t border-graphite-line py-16"
           >
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-accent">
-                  Destacados
-                </p>
-                <h2 id="featured" className="mt-2 text-hero">
-                  Artistas con disponibilidad real
-                </h2>
-              </div>
-              <Link
-                href="/artistas"
-                className="text-sm font-bold text-paper underline underline-offset-4 hover:text-accent"
-              >
-                Ver todo el directorio →
-              </Link>
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-accent">
+                Destacados
+              </p>
+              <h2 id="featured" className="mt-2 text-hero">
+                Artistas con disponibilidad real
+              </h2>
             </div>
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((a) => (
@@ -196,6 +188,7 @@ export default async function LandingPage() {
                       genres: a.genres,
                       cacheMin: a.cacheMin,
                       cacheMax: a.cacheMax,
+                      cachePublic: a.cachePublic,
                       currency: a.currency,
                       completenessScore: a.completenessScore,
                       coverUrl: a.media[0]?.url ?? null,
