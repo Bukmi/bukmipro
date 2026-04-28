@@ -91,6 +91,10 @@ export const artistProfileSchema = z.object({
   cacheMin: z.coerce.number().int().min(0).max(500000).optional().nullable(),
   cacheMax: z.coerce.number().int().min(0).max(500000).optional().nullable(),
   currency: z.string().length(3).default("EUR"),
+  cachePublic: z
+    .union([z.literal("on"), z.literal("true"), z.literal("false"), z.boolean()])
+    .optional()
+    .transform((v) => v === true || v === "on" || v === "true"),
   spotifyUrl: urlOrEmpty,
   youtubeUrl: urlOrEmpty,
   instagramUrl: urlOrEmpty,
