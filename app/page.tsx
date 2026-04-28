@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { FeaturedSection } from "@/components/landing/featured-section";
+import { MetricsSection } from "@/components/landing/metrics-section";
 
 export const revalidate = 600;
 
@@ -69,10 +70,14 @@ const promoterBenefits = [
 ];
 
 export default async function LandingPage() {
-  const [artistCount, promoterCount, bookedCount, featured] = await Promise.all([
+  const [artistCount, promoterCount, bookedCount, budgetAgg, featured] = await Promise.all([
     prisma.artistProfile.count(),
     prisma.promoterProfile.count(),
     prisma.bookingRequest.count({ where: { status: "BOOKED" } }),
+    prisma.bookingRequest.aggregate({
+      where: { status: "BOOKED" },
+      _sum: { budgetMax: true },
+    }),
     prisma.artistProfile.findMany({
       where: { published: true },
       include: {
@@ -119,28 +124,30 @@ export default async function LandingPage() {
         </section>
 
         {/* ── Métricas ─────────────────────────────────────────────── */}
-        <section
-          aria-labelledby="metrics"
-          className="container-hero border-t border-graphite-line py-16"
-        >
-          <h2 id="metrics" className="sr-only">Bukmi en números</h2>
-          <dl className="grid grid-cols-3 gap-8 text-center">
-            {[
-              { value: artistCount,  label: "Artistas" },
-              { value: promoterCount, label: "Promotoras" },
-              { value: bookedCount,  label: "Shows cerrados" },
-            ].map(({ value, label }) => (
-              <div key={label} className="flex flex-col gap-2">
-                <dt className="text-xs uppercase tracking-[0.2em] text-paper-mute order-last">
-                  {label}
-                </dt>
-                <dd className="text-5xl font-extrabold tabular-nums text-accent sm:text-6xl">
-                  {value.toLocaleString("es-ES")}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
+        <MetricsSection
+          metrics={[
+            {
+              raw: artistCount,
+              label: "Artistas verificados",
+              sublabel: "Solos, bandas y DJ activos",
+            },
+            {
+              raw: promoterCount,
+              label: "Promotoras",
+              sublabel: "Salas, festivales y agencias",
+            },
+            {
+              raw: bookedCount,
+              label: "Shows cerrados",
+              sublabel: "Vía Bukmi, últimos 90 días",
+            },
+            {
+              raw: budgetAgg._sum.budgetMax ?? 0,
+              label: "€ generados",
+              sublabel: "Cachés cerrados vía Bukmi",
+            },
+          ]}
+        />
 
         {/* ── Cómo funciona ───────────────────────────────────────── */}
         <section
