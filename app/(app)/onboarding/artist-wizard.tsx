@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useState, useTransition, useRef } from "react";
 import { Music2, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
@@ -35,8 +35,14 @@ function normalizeGenres(spotifyGenres: string[]): string[] {
   return matched;
 }
 
+// Detecta si una cadena contiene un ID de artista de Spotify válido (client-side)
+function looksLikeSpotifyArtistUrl(val: string): boolean {
+  return /open\.spotify\.com\/(?:intl-[a-z]{2}\/)?artist\/[A-Za-z0-9]+/.test(val) ||
+    /spotify:artist:[A-Za-z0-9]+/.test(val);
+}
+
 // ---------------------------------------------------------------------------
-// Spotify import mini-form
+// Spotify import — auto-importa al pegar una URL válida
 // ---------------------------------------------------------------------------
 
 function SpotifyImporter({
@@ -44,6 +50,7 @@ function SpotifyImporter({
 }: {
   onImport: (result: Extract<SpotifyImportResult, { ok: true }>) => void;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [result, dispatch, importing] = useActionState<
     SpotifyImportResult | null,
     FormData
@@ -56,47 +63,59 @@ function SpotifyImporter({
     onImport(result);
   }
 
+  // Auto-submit cuando el input contiene una URL válida de Spotify
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (looksLikeSpotifyArtistUrl(e.target.value)) {
+      formRef.current?.requestSubmit();
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <form action={dispatch} className="flex flex-col gap-3">
+      <form ref={formRef} action={dispatch} className="flex flex-col gap-3">
         <Field
           id="spotifyUrl"
           label="Tu perfil de Spotify"
-          hint="https://open.spotify.com/artist/…"
+          hint='Pega el enlace de tu artista en Spotify y lo importamos al instante'
           error={!result?.ok ? result?.error : undefined}
         >
-          <div className="flex gap-2">
+          <div className="relative">
             <Input
               name="spotifyUrl"
               type="url"
               placeholder="https://open.spotify.com/artist/…"
               autoComplete="off"
-              className="flex-1"
+              onChange={handleChange}
+              disabled={importing || result?.ok === true}
+              className="pr-10"
             />
-            <Button type="submit" disabled={importing} className="shrink-0">
-              {importing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Importar"
-              )}
-            </Button>
+            {importing && (
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-accent" />
+            )}
           </div>
         </Field>
       </form>
 
       {result?.ok && (
-        <div className="flex items-start gap-3 rounded-xl bg-accent/10 border border-accent/30 p-4">
-          <CheckCircle2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-paper">
-              ¡Importado! Datos de {result.artist.name}
+        <div className="flex items-center gap-4 rounded-xl bg-accent/10 border border-accent/30 p-4">
+          <CheckCircle2 className="h-6 w-6 text-accent shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-paper">
+              {result.artist.name}
             </p>
             <p className="text-xs text-paper-dim mt-0.5">
-              {result.artist.followers.toLocaleString("es-ES")} seguidores
+              {result.artist.followers.toLocaleString("es-ES")} seguidores en Spotify
               {result.artist.genres.length > 0 &&
                 ` · ${result.artist.genres.slice(0, 3).join(", ")}`}
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="text-xs text-paper-mute underline-offset-4 hover:text-paper hover:underline shrink-0"
+          >
+            Cambiar
+          </button>
         </div>
       )}
     </div>
