@@ -242,24 +242,40 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
     // -------------------------------------------------------------------
     {
       id: "basics",
-      title: "Datos básicos",
-      description: "Así aparecerás en el buscador de promotoras.",
+      title: spotifyData ? "Un par de datos más" : "Datos básicos",
+      description: spotifyData
+        ? "Ciudad y formato es todo lo que nos falta."
+        : "Así aparecerás en el buscador de promotoras.",
       content: (
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field
-            id="stageName"
-            label="Nombre artístico"
-            required
-            error={state?.fieldErrors?.stageName}
-          >
-            <Input
-              name="stageName"
-              autoComplete="nickname"
-              placeholder="Ej. Rosalía Indie"
-              value={stageName}
-              onChange={(e) => setStageName(e.target.value)}
-            />
-          </Field>
+          {spotifyData ? (
+            /* Nombre ya importado de Spotify — solo mostramos confirmación */
+            <>
+              <input type="hidden" name="stageName" value={stageName} />
+              <div className="sm:col-span-2 flex items-center gap-3 rounded-xl bg-graphite-soft px-4 py-3 ring-1 ring-graphite-line">
+                <Music2 aria-hidden className="h-4 w-4 text-accent shrink-0" />
+                <div>
+                  <p className="text-xs text-paper-dim">Nombre artístico</p>
+                  <p className="font-semibold text-paper">{stageName}</p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <Field
+              id="stageName"
+              label="Nombre artístico"
+              required
+              error={state?.fieldErrors?.stageName}
+            >
+              <Input
+                name="stageName"
+                autoComplete="nickname"
+                placeholder="Ej. Claim"
+                value={stageName}
+                onChange={(e) => setStageName(e.target.value)}
+              />
+            </Field>
+          )}
           <Field
             id="formatType"
             label="Formato"
