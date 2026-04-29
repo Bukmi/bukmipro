@@ -40,8 +40,9 @@ type NextStep = {
 export default async function BienvenidaPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
-  if (session.user.onboardingStatus !== "COMPLETED") redirect("/onboarding");
 
+  // Verificamos desde la DB (no del JWT) para evitar race conditions después
+  // de skipOnboarding donde el JWT puede llegar desactualizado.
   const artist = await prisma.artistProfile.findUnique({
     where: { userId: session.user.id },
     select: {

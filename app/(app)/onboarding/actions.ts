@@ -104,11 +104,12 @@ export async function skipOnboarding() {
     data: { onboardingStatus: "COMPLETED" },
   });
 
-  // Fuerza refresco del JWT para que el middleware vea onboardingStatus: COMPLETED
+  // Fuerza refresco del JWT — redirigimos a /bienvenida (bajo /onboarding, no /dashboard)
+  // para evitar la race condition del JWT con el middleware.
   await unstable_update({});
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  redirect("/onboarding/bienvenida");
 }
 
 async function requireUser() {
