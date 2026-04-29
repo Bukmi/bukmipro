@@ -444,23 +444,24 @@ export function ArtistWizard({ defaultEmail }: { defaultEmail: string }) {
         "Añade tus redes y un caché orientativo para aparecer en más búsquedas.",
       content: (
         <div className="grid gap-5 sm:grid-cols-2">
-          {/* Spotify URL — pre-filled if imported */}
-          <Field
-            id="spotifyUrl"
-            label="Spotify"
-            hint="https://open.spotify.com/artist/…"
-            error={state?.fieldErrors?.spotifyUrl}
-          >
-            <Input
-              name="spotifyUrl"
-              type="url"
-              placeholder="https://open.spotify.com/artist/…"
-              defaultValue={
-                spotifyData ? spotifyData.artist.externalUrl : undefined
-              }
-              autoComplete="off"
-            />
-          </Field>
+          {/* Spotify URL — solo se muestra si no se importó en el paso anterior */}
+          {spotifyData ? (
+            <input type="hidden" name="spotifyUrl" value={spotifyData.artist.externalUrl} />
+          ) : (
+            <Field
+              id="spotifyUrl"
+              label="Spotify"
+              hint="https://open.spotify.com/artist/…"
+              error={state?.fieldErrors?.spotifyUrl}
+            >
+              <Input
+                name="spotifyUrl"
+                type="url"
+                placeholder="https://open.spotify.com/artist/…"
+                autoComplete="off"
+              />
+            </Field>
+          )}
           <Field
             id="youtubeUrl"
             label="YouTube"
