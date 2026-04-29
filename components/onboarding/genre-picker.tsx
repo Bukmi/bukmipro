@@ -7,19 +7,40 @@ type Props = {
   name: string;
   options: readonly string[];
   defaultValue?: string[];
+  /** Controlled mode: current selection */
+  value?: string[];
+  /** Controlled mode: called on every toggle */
+  onChange?: (next: string[]) => void;
   max?: number;
   describedBy?: string;
 };
 
-export function GenrePicker({ name, options, defaultValue = [], max = 5, describedBy }: Props) {
-  const [selected, setSelected] = useState<string[]>(defaultValue);
+export function GenrePicker({
+  name,
+  options,
+  defaultValue = [],
+  value,
+  onChange,
+  max = 5,
+  describedBy,
+}: Props) {
+  const [internalSelected, setInternalSelected] = useState<string[]>(defaultValue);
+
+  // Controlled vs uncontrolled
+  const selected = value !== undefined ? value : internalSelected;
 
   const toggle = (genre: string) => {
-    setSelected((prev) => {
-      if (prev.includes(genre)) return prev.filter((g) => g !== genre);
-      if (prev.length >= max) return prev;
-      return [...prev, genre];
-    });
+    const next = selected.includes(genre)
+      ? selected.filter((g) => g !== genre)
+      : selected.length >= max
+      ? selected
+      : [...selected, genre];
+
+    if (onChange) {
+      onChange(next);
+    } else {
+      setInternalSelected(next);
+    }
   };
 
   return (

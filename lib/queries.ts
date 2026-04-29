@@ -12,6 +12,7 @@ export const getPublicArtistBySlug = cache(async (slug: string) => {
     where: { slug },
     include: {
       media: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], take: 12 },
+      riders: { select: { id: true }, take: 1 },
       proposals: {
         where: {
           status: "BOOKED",

@@ -136,16 +136,25 @@ export function ProfileForm({ profile }: { profile: ArtistProfile }) {
       <section aria-labelledby="redes" className="grid gap-5 sm:grid-cols-2">
         <h2 id="redes" className="sm:col-span-2 text-base font-extrabold">Plataformas</h2>
         <Field id="spotifyUrl" label="Spotify" error={state?.fieldErrors?.spotifyUrl}>
-          <Input name="spotifyUrl" type="url" defaultValue={profile.spotifyUrl ?? ""} placeholder="https://open.spotify.com/artist/…" />
+          <Input name="spotifyUrl" type="url" defaultValue={(profile as { spotifyUrl?: string | null }).spotifyUrl ?? ""} placeholder="https://open.spotify.com/artist/…" />
         </Field>
         <Field id="youtubeUrl" label="YouTube" error={state?.fieldErrors?.youtubeUrl}>
-          <Input name="youtubeUrl" type="url" defaultValue={profile.youtubeUrl ?? ""} placeholder="https://youtube.com/@…" />
+          <Input name="youtubeUrl" type="url" defaultValue={(profile as { youtubeUrl?: string | null }).youtubeUrl ?? ""} placeholder="https://youtube.com/@…" />
         </Field>
         <Field id="instagramUrl" label="Instagram" error={state?.fieldErrors?.instagramUrl}>
-          <Input name="instagramUrl" type="url" defaultValue={profile.instagramUrl ?? ""} placeholder="https://instagram.com/…" />
+          <Input name="instagramUrl" type="url" defaultValue={(profile as { instagramUrl?: string | null }).instagramUrl ?? ""} placeholder="https://instagram.com/…" />
+        </Field>
+        <Field id="tikTokUrl" label="TikTok" error={state?.fieldErrors?.tikTokUrl}>
+          <Input name="tikTokUrl" type="url" defaultValue={(profile as { tikTokUrl?: string | null }).tikTokUrl ?? ""} placeholder="https://tiktok.com/@tunombre" />
         </Field>
         <Field id="soundcloudUrl" label="SoundCloud" error={state?.fieldErrors?.soundcloudUrl}>
-          <Input name="soundcloudUrl" type="url" defaultValue={profile.soundcloudUrl ?? ""} placeholder="https://soundcloud.com/…" />
+          <Input name="soundcloudUrl" type="url" defaultValue={(profile as { soundcloudUrl?: string | null }).soundcloudUrl ?? ""} placeholder="https://soundcloud.com/…" />
+        </Field>
+        <Field id="bandsintownUrl" label="Bandsintown" error={state?.fieldErrors?.bandsintownUrl}>
+          <Input name="bandsintownUrl" type="url" defaultValue={(profile as { bandsintownUrl?: string | null }).bandsintownUrl ?? ""} placeholder="https://bandsintown.com/a/…" />
+        </Field>
+        <Field id="instagramFollowers" label="Seguidores en Instagram" hint="Introduce el número manualmente" error={state?.fieldErrors?.instagramFollowers} className="sm:col-span-2">
+          <Input name="instagramFollowers" type="number" min={0} defaultValue={(profile as { instagramFollowers?: number | null }).instagramFollowers ?? ""} placeholder="Ej. 12000" />
         </Field>
       </section>
 

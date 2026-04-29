@@ -60,11 +60,17 @@ export const artistOnboardingSchema = z.object({
   spotifyUrl: urlOrEmptyOnboarding,
   youtubeUrl: urlOrEmptyOnboarding,
   instagramUrl: urlOrEmptyOnboarding,
+  tikTokUrl: urlOrEmptyOnboarding,
+  bandsintownUrl: urlOrEmptyOnboarding,
   cacheMin: z.coerce.number().int().min(0).max(500000).optional().nullable(),
   cacheMax: z.coerce.number().int().min(0).max(500000).optional().nullable(),
   cachePublic: z.boolean().default(true),
   currency: z.string().length(3).default("EUR"),
   published: z.boolean().default(false),
+  // Spotify-enriched fields (pre-filled, not editable in form directly)
+  spotifyArtistId: z.string().optional().nullable(),
+  spotifyFollowers: z.coerce.number().int().min(0).optional().nullable(),
+  spotifyTopTrackId: z.string().optional().nullable(),
 }).refine(
   (d) => !(d.cacheMin && d.cacheMax) || d.cacheMin <= d.cacheMax,
   { message: "El caché mínimo no puede superar el máximo", path: ["cacheMin"] }
@@ -99,6 +105,9 @@ export const artistProfileSchema = z.object({
   youtubeUrl: urlOrEmpty,
   instagramUrl: urlOrEmpty,
   soundcloudUrl: urlOrEmpty,
+  tikTokUrl: urlOrEmpty,
+  bandsintownUrl: urlOrEmpty,
+  instagramFollowers: z.coerce.number().int().min(0).max(999_000_000).optional().nullable(),
   published: z
     .union([z.literal("on"), z.literal("true"), z.literal("false"), z.boolean()])
     .optional()

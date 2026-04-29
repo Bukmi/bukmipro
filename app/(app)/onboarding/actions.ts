@@ -7,6 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { computeCompleteness } from "@/lib/artist";
 import { canPublishProfile, planStatus } from "@/lib/plan";
+import { parseSpotifyArtistId, fetchSpotifyArtist, type SpotifyArtist } from "@/lib/spotify";
+import { enrichBio } from "@/lib/bio-enrichment";
+import { suggestCache } from "@/lib/cache-calculator";
 import {
   artistOnboardingSchema,
   officeOnboardingSchema,
@@ -17,6 +20,56 @@ export type OnboardingState = {
   error?: string;
   fieldErrors?: Record<string, string>;
 };
+
+// ---------------------------------------------------------------------------
+// Spotify import action
+// ---------------------------------------------------------------------------
+
+export type SpotifyImportResult =
+  | { ok: true; artist: SpotifyArtist; bio: string; bioSource: string | null; cacheMin: number | null; cacheMax: number | null }
+  | { ok: false; error: string };
+
+export async function importFromSpotify(
+  _prev: SpotifyImportResult | null,
+  formData: FormData
+): Promise<SpotifyImportResult> {
+  const url = String(formData.get("spotifyUrl") ?? "").trim();
+  if (!url) return { ok: false, error: "Introduce tu URL de Spotify." };
+
+  const artistId = parseSpotifyArtistId(url);
+  if (!artistId) {
+    return {
+      ok: false,
+      error: "URL no reconocida. Usa el enlace de tu perfil de artista en Spotify.",
+    };
+  }
+
+  let artist: SpotifyArtist | null;
+  try {
+    artist = await fetchSpotifyArtist(artistId);
+  } catch {
+    return { ok: false, error: "No pudimos conectar con Spotify. Inténtalo de nuevo." };
+  }
+
+  if (!artist) {
+    return { ok: false, error: "No encontramos ese artista en Spotify. Revisa la URL." };
+  }
+
+  // Bio enrichment and cache suggestion run in parallel
+  const [bioResult, cacheSuggestion] = await Promise.all([
+    enrichBio(artist.name),
+    Promise.resolve(suggestCache(artist.followers)),
+  ]);
+
+  return {
+    ok: true,
+    artist,
+    bio: bioResult.bio,
+    bioSource: bioResult.source,
+    cacheMin: cacheSuggestion?.min ?? null,
+    cacheMax: cacheSuggestion?.max ?? null,
+  };
+}
 
 export async function skipOnboarding() {
   const user = await requireUser();
@@ -83,11 +136,16 @@ export async function completeArtistOnboarding(
     spotifyUrl: String(formData.get("spotifyUrl") ?? ""),
     youtubeUrl: String(formData.get("youtubeUrl") ?? ""),
     instagramUrl: String(formData.get("instagramUrl") ?? ""),
+    tikTokUrl: String(formData.get("tikTokUrl") ?? ""),
+    bandsintownUrl: String(formData.get("bandsintownUrl") ?? ""),
     cacheMin: String(formData.get("cacheMin") ?? "") || null,
     cacheMax: String(formData.get("cacheMax") ?? "") || null,
     cachePublic: formData.get("cachePublic") !== null,
     currency: String(formData.get("currency") ?? "EUR"),
     published: formData.get("published") !== null,
+    spotifyArtistId: String(formData.get("spotifyArtistId") ?? "") || null,
+    spotifyFollowers: String(formData.get("spotifyFollowers") ?? "") || null,
+    spotifyTopTrackId: String(formData.get("spotifyTopTrackId") ?? "") || null,
   };
 
   const parsed = artistOnboardingSchema.safeParse(raw);
@@ -129,6 +187,9 @@ export async function completeArtistOnboarding(
     ridersCount: 0,
   });
 
+  const socialSyncedAt =
+    parsed.data.spotifyArtistId ? new Date() : undefined;
+
   await prisma.artistProfile.upsert({
     where: { userId: user.id },
     create: {
@@ -143,12 +204,18 @@ export async function completeArtistOnboarding(
       spotifyUrl: parsed.data.spotifyUrl ?? null,
       youtubeUrl: parsed.data.youtubeUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,
+      tikTokUrl: parsed.data.tikTokUrl ?? null,
+      bandsintownUrl: parsed.data.bandsintownUrl ?? null,
       cacheMin: parsed.data.cacheMin ?? null,
       cacheMax: parsed.data.cacheMax ?? null,
       cachePublic: parsed.data.cachePublic,
       currency: parsed.data.currency,
       published: parsed.data.published,
       completenessScore,
+      spotifyArtistId: parsed.data.spotifyArtistId ?? null,
+      spotifyFollowers: parsed.data.spotifyFollowers ?? null,
+      spotifyTopTrackId: parsed.data.spotifyTopTrackId ?? null,
+      socialSyncedAt,
     },
     update: {
       stageName: parsed.data.stageName,
@@ -160,12 +227,20 @@ export async function completeArtistOnboarding(
       spotifyUrl: parsed.data.spotifyUrl ?? null,
       youtubeUrl: parsed.data.youtubeUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,
+      tikTokUrl: parsed.data.tikTokUrl ?? null,
+      bandsintownUrl: parsed.data.bandsintownUrl ?? null,
       cacheMin: parsed.data.cacheMin ?? null,
       cacheMax: parsed.data.cacheMax ?? null,
       cachePublic: parsed.data.cachePublic,
       currency: parsed.data.currency,
       published: parsed.data.published,
       completenessScore,
+      ...(parsed.data.spotifyArtistId && {
+        spotifyArtistId: parsed.data.spotifyArtistId,
+        spotifyFollowers: parsed.data.spotifyFollowers ?? null,
+        spotifyTopTrackId: parsed.data.spotifyTopTrackId ?? null,
+        socialSyncedAt,
+      }),
     },
   });
 

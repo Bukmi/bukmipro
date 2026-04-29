@@ -35,6 +35,9 @@ export async function saveArtistProfile(
     youtubeUrl: String(formData.get("youtubeUrl") ?? ""),
     instagramUrl: String(formData.get("instagramUrl") ?? ""),
     soundcloudUrl: String(formData.get("soundcloudUrl") ?? ""),
+    tikTokUrl: String(formData.get("tikTokUrl") ?? ""),
+    bandsintownUrl: String(formData.get("bandsintownUrl") ?? ""),
+    instagramFollowers: String(formData.get("instagramFollowers") ?? "") || null,
     published: formData.get("published"),
   };
 
@@ -97,6 +100,9 @@ export async function saveArtistProfile(
       youtubeUrl: parsed.data.youtubeUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,
       soundcloudUrl: parsed.data.soundcloudUrl ?? null,
+      tikTokUrl: parsed.data.tikTokUrl ?? null,
+      bandsintownUrl: parsed.data.bandsintownUrl ?? null,
+      instagramFollowers: parsed.data.instagramFollowers ?? null,
       published: parsed.data.published,
       completenessScore,
     },
