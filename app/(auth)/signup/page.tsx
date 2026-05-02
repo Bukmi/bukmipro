@@ -3,14 +3,14 @@ import { SignupForm } from "./signup-form";
 
 export const metadata: Metadata = {
   title: "Crear cuenta",
-  description: "Crea tu cuenta en Bukmi y empieza a cerrar conciertos sin intermediarios.",
+  description: "Crea tu cuenta en Bukmi y empieza a cerrar shows sin intermediarios.",
 };
 
 type SearchParams = Promise<{ role?: string }>;
 type Role = "ARTIST" | "PROMOTER" | "OFFICE";
 
 function normaliseRole(raw: string | undefined): Role {
-  if (raw === "PROMOTER" || raw === "OFFICE" || raw === "ARTIST") return raw;
+  if (raw === "PROMOTER" || raw === "ARTIST") return raw;
   return "ARTIST";
 }
 
@@ -34,7 +34,7 @@ export default async function SignupPage({
           disponibilidad y facturación en un solo sitio.
         </p>
         <ul className="mt-4 space-y-3 text-sm text-paper-dim">
-          <li>· Perfil público listo en menos de 5 minutos</li>
+          <li>· Bio con IA en 60s, perfil público en minutos</li>
           <li>· Calendario y bandeja de solicitudes unificados</li>
           <li>· Firma digital y documentación versionada</li>
         </ul>

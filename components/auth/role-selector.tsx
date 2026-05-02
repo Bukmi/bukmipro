@@ -3,14 +3,13 @@
 import * as React from "react";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import { cn } from "@/lib/utils";
-import { Mic2, Building2, Briefcase, CheckCircle2 } from "lucide-react";
+import { Mic2, Building2, CheckCircle2 } from "lucide-react";
 
 type Role = "ARTIST" | "PROMOTER" | "OFFICE";
 
 const options: { value: Role; title: string; desc: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { value: "ARTIST", title: "Artista", desc: "Individual o banda, con o sin mánager.", Icon: Mic2 },
   { value: "PROMOTER", title: "Promotora", desc: "Sala, festival o organizadora de eventos.", Icon: Building2 },
-  { value: "OFFICE", title: "Oficina", desc: "Mánager, sello o agencia multi-artista.", Icon: Briefcase },
 ];
 
 type Props = {

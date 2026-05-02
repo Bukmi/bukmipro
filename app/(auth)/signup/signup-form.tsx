@@ -28,14 +28,13 @@ export function SignupForm({ defaultRole }: { defaultRole: Role }) {
         <p className="mt-4 text-paper-dim">
           Hemos enviado un enlace de verificación a{" "}
           <strong className="text-paper">{state.email}</strong>. Abre el enlace
-          para activar tu cuenta y continuar con el onboarding.
+          para activar tu cuenta y completar tu perfil.
         </p>
-        <p className="mt-4 text-xs text-paper-mute">
-          En desarrollo, el enlace aparece también en la consola del servidor.
-        </p>
-        <Button asChild variant="secondary" className="mt-8">
-          <Link href="/login">Ir a iniciar sesión</Link>
-        </Button>
+        {process.env.NODE_ENV === "development" && (
+          <p className="mt-4 text-xs text-paper-mute">
+            En desarrollo, el enlace aparece también en la consola del servidor.
+          </p>
+        )}
       </div>
     );
   }
@@ -119,7 +118,7 @@ export function SignupForm({ defaultRole }: { defaultRole: Role }) {
       )}
 
       <Button type="submit" size="lg" disabled={pending} aria-busy={pending}>
-        {pending ? "Creando cuenta…" : "Crear cuenta"}
+        {pending ? "Creando cuenta…" : "Crear cuenta gratis"}
       </Button>
 
       <p className="text-center text-sm text-paper-dim">
